@@ -8,9 +8,6 @@ num_operations=$5
 pick_randomly=${6:-yes}
 random_bpe_seed=${7:-1917}
 
-order=3 # unused?
-size=3  # unused?
-
 check_these_vars=(
     "text_file"
     "out_file"
@@ -67,21 +64,11 @@ learn_bpe() {
 }
 
 get_vocab() {
-    # To segment rare words into character n-grams, do the following:
     local text_file=$1
     local vocab_file=$2
-    local order=$3
-    local size=$4
     subword-nmt get-vocab \
         --text_file "${text_file}" \
         --vocab_file "${vocab_file}"
-
-    subword-nmt segment-char-ngrams \
-        --vocab "${vocab_file}" \
-        -n "${order}" \
-        --shortlist "${ize}" \
-        <"${text_file}" \
-        >"${out_file}"
 }
 
 reverse_bpe_segmentation() {
