@@ -79,4 +79,24 @@ reverse_bpe_segmentation() {
         >"${out_file}"
 }
 
-check_args
+main() {
+    local text_file=$1
+    local out_file=$2
+    local vocab_file=$3
+    local codes_file=$4
+    local num_operations=$5
+    local pick_randomly=$6
+    local random_bpe_seed=$7
+
+    check_args
+    learn_bpe \
+        "${text_file}" \
+        "${num_operations}" \
+        "${codes_file}" \
+        "${pick_randomly}" \
+        "${random_bpe_seed}"
+    apply_bpe \
+        "${text_file}" \
+        "${codes_file}" \
+        "${out_file}"
+}
