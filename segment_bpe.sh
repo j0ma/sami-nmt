@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 text_file=$1
 out_file=$2
 vocab_file=$3
 codes_file=$4
 num_operations=$5
 pick_randomly=${6:-yes}
-random_bpe_seed=${7:-1917}
+random_bpe_seed=${7}
 
 check_these_vars=(
     "text_file"
@@ -67,13 +69,13 @@ get_vocab() {
     local text_file=$1
     local vocab_file=$2
     subword-nmt get-vocab \
-        --text_file "${text_file}" \
-        --vocab_file "${vocab_file}"
+        -i "${text_file}" \
+        -o "${vocab_file}"
 }
 
 reverse_bpe_segmentation() {
     local text_file=$1
-    local out_file=$1
+    local out_file=$2
     sed -r 's/(@@ )|(@@ ?$)//g' \
         <"${text_file}" \
         >"${out_file}"
@@ -99,4 +101,8 @@ main() {
         "${text_file}" \
         "${codes_file}" \
         "${out_file}"
+
+    get_vocab "${out_file}" "${vocab_file}"
 }
+
+main $text_file $out_file $vocab_file $codes_file $num_operations $pick_randomly $random_bpe_seed
