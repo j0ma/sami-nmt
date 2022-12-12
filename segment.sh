@@ -52,7 +52,7 @@ learn_bpe() {
         >"${codes_file}"
 }
 
-learn_bpe() {
+apply_bpe() {
     local text_file=$1
     local codes_file=$2
     local out_file=$3
