@@ -14,30 +14,19 @@ cuda_visible=${CUDA_VISIBLE_DEVICES:-""}
 
 # TODO: Change this
 check_these_vars=(
-    "ec_root_folder"
-    "ec_experiment_name"
-    "ec_model_name"
-    "ec_raw_data_folder"
-    "pp_ngram_size"
-    "pp_train_file"
-    "pp_dev_file"
-    "pp_test_file"
-    "pp_ner_types"
-    "tr_mem_size"
-    "tr_batch_size"
-    "tr_num_epochs"
-    "tr_use_softgaz_features"
+    "experiment_name"
+    "model_name"
+    "random_seed"
 )
 
 # Step 0: Dependencies
 check_deps() {
     echo "❗  Checking dependencies..."
-    external_dependencies=(prepx seqscore jq)
-    for dep in "${external_dependencies[@]}"; do
+    while read -r dep; do
         test -z "$(which $dep)" &&
             echo "Missing dependency: ${dep}" &&
-            exit 1
-    done
+            exit 1 || echo "Found ${dep} ➡  $(which $dep)"
+    done <requirements_external.txt
     echo "✅  Dependencies seem OK"
 }
 
