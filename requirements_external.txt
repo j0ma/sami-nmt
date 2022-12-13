@@ -1,4 +1,3 @@
-seqscore
 prepx
 bat
 xsv
