@@ -12,4 +12,4 @@ export randseg_binarized_data_folder=/tmp/randseg_bindata_test
 export randseg_source_language=eng
 export randseg_target_language=est
 
-mkdir -p $randseg_bindata_test $randseg_ckpt_test
+mkdir -p $randseg_checkpoints_folder $randseg_binarized_data_folder
