@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export randseg_checkpoints_folder=/data/randseg_ckpt_test
+export randseg_checkpoints_folder=/tmp/randseg_ckpt_test
 export randseg_experiment_name=TEST_talitiainen
 export randseg_model_name=valiaikainen
 export randseg_random_seed=2022
