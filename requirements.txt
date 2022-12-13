@@ -3,3 +3,5 @@ git+ssh://git@github.com/j0ma/subword-nmt.git@random-merges
 git+ssh://git@github.com/j0ma/prepx@main
 
 fairseq
+ranger-fm
+tensorboardX

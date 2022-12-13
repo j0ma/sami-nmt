@@ -1,4 +1,3 @@
-prepx
 bat
 xsv
 jq
