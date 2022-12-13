@@ -10,7 +10,6 @@ append_meta=${3:-"false"}
 
 cuda_visible=${CUDA_VISIBLE_DEVICES:-""}
 
-# TODO: Change this
 check_these_vars=(
     "randseg_experiment_name"
     "randseg_model_name"
@@ -47,9 +46,8 @@ add_metadata() {
 
 create_temp_folder() {
     local default_prefix=$(
-        grep -q "^hpcc" &&
-            echo "$WORK/$(whoami)" ||
-            echo "/tmp"
+    (hostname | grep -q "^hpcc") \
+    && echo "$WORK/$(whoami)" || echo "/tmp"
     )
     local prefix=${1:-"${default_prefix}"}
     local template=${2:-"some_temp_folder"}
@@ -159,7 +157,7 @@ train() {
 
     warmup_updates_flag="--warmup-updates=${randseg_warmup_updates}"
 
-    if [[ "${LR_SCHEDULER}" == "inverse_sqrt" ]]; then
+    if [[ "${randseg_lr_scheduler}" == "inverse_sqrt" ]]; then
         warmup_init_lr_flag="--warmup-init-lr=${randseg_warmup_init_lr}"
     else
         warmup_init_lr_flag=""
@@ -242,7 +240,3 @@ main() {
 }
 
 main "${config_file}" "${should_confirm}"
-
-# IDEAS / TODO
-# - environment should be printed into supplemental data
-# - binarized data folder creation needs to happen
