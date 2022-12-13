@@ -1,22 +1,28 @@
 #!/usr/bin/env bash
 
-# Complete experiment sequence for soft-gazetteers
-
-set -xeuo pipefail
+# Complete experiment sequence
+set -eox pipefail
 
 # Constants
 config_file=$1
-language=${2:-""}
-should_confirm=${3:-"true"}
-append_meta=${4:-"false"}
+should_confirm=${2:-"true"}
+append_meta=${3:-"false"}
 
 cuda_visible=${CUDA_VISIBLE_DEVICES:-""}
 
 # TODO: Change this
 check_these_vars=(
-    "experiment_name"
-    "model_name"
-    "random_seed"
+    "randseg_experiment_name"
+    "randseg_model_name"
+    "randseg_random_seed"
+    "randseg_pick_randomly"
+    "randseg_num_merges"
+    "randseg_root_folder"
+    "randseg_raw_data_folder"
+    "randseg_binarized_data_folder"
+    "randseg_checkpoints_folder"
+    "randseg_source_language"
+    "randseg_target_language"
 )
 
 # Step 0: Dependencies
@@ -31,41 +37,39 @@ check_deps() {
 }
 
 fill_optionals() {
-    # TODO: Change this
-    export pp_kb_file=${pp_kb_file:-""}
-    export pp_links_file=${pp_links_file:-""}
-    export pp_paranames_tsv_file=${pp_paranames_tsv_file:-""}
-    export pp_disambiguation_rules=${pp_disambiguation_rules:-{}}
-    export pp_should_disambiguate=${pp_should_disambiguate:-"true"}
-    export pp_existing_data_folder=${pp_existing_data_folder:-""}
-    export pp_ln_or_cp_cmd=${pp_ln_or_cp_cmd:-"ln"}
-    export tr_use_lstm_softgaz_features=${tr_use_lstm_softgaz_features:-"true"}
-    export tr_use_crf_softgaz_features=${tr_use_crf_softgaz_features:-"true"}
-    export tr_use_autoencoder_loss=${tr_use_autoencoder_loss:-"true"}
-    export tr_word_embed_dim=${tr_word_embed_dim:-100}     # default value from args.py
-    export tr_lstm_hidden_size=${tr_lstm_hidden_size:-200} # default value from args.py
-    export tr_random_seed=${tr_random_seed:-1}
+    . config/default_hparams.sh
+}
+
+add_metadata() {
+    local experiment_name=$1
+    echo "👷 TODO❗" && exit 1
+}
+
+create_temp_folder() {
+    local default_prefix=$(
+        grep -q "^hpcc" &&
+            echo "$WORK/$(whoami)" ||
+            echo "/tmp"
+    )
+    local prefix=${1:-"${default_prefix}"}
+    local template=${2:-"some_temp_folder"}
+    mktemp -d -p "${prefix}" "${template}"
 }
 
 check_env() {
     echo "❗ Checking environment..."
 
     # First check mandatory variables
+    missing=false
     for var in "${check_these_vars[@]}"; do
         eval "test -z \$$var" &&
             echo "Missing variable: $var" &&
-            missing="true" || missing="false"
+            missing="true"
     done
     test "$missing" = "true" && exit 1
 
     # Then check and fill optionals
     fill_optionals
-
-    # Append seed to experiment name if necessary
-    if [ "${append_meta}" = "true" ]; then
-        # TODO: Change this
-        export ec_experiment_name="${ec_experiment_name}_seed${tr_random_seed}_lstm${tr_lstm_hidden_size}_emb${tr_word_embed_dim}"
-    fi
 
     echo "✅  Environment seems OK"
 }
@@ -75,10 +79,12 @@ create_experiment() {
 
     prepx create \
         --with-tensorboard --with-supplemental-data \
-        --root-folder="${ec_root_folder}" \
-        --experiment-name="${ec_experiment_name}" \
-        --train-name="${ec_model_name}" \
-        --raw-data-folder="${ec_raw_data_folder}"
+        --root-folder="${randseg_root_folder}" \
+        --experiment-name="${randseg_experiment_name}" \
+        --train-name="${randseg_model_name}" \
+        --raw-data-folder="${randseg_raw_data_folder}" \
+        --checkpoints-folder="${randseg_checkpoints_folder}" \
+        --binarized-data-folder="${randseg_binarized_data_folder}"
 
     echo "✅  Done!"
 }
@@ -86,96 +92,52 @@ create_experiment() {
 preprocess() {
     echo "❗ Preprocessing..."
 
-    data_folder="${ec_root_folder}/${ec_experiment_name}/train/${ec_model_name}/raw_data"
-    supplemental_data_folder="${ec_root_folder}/${ec_experiment_name}/train/${ec_model_name}/supplemental_data"
+    . scripts/bpe_functions.sh
 
-    export pp_ngrams_output_file="${supplemental_data_folder}/ngrams.txt"
-    export pp_kb_output_file="${supplemental_data_folder}/kb.txt"
-    export pp_links_output_file="${supplemental_data_folder}/links.txt"
+    train_folder="${randseg_root_folder}/${randseg_experiment_name}/train/${randseg_model_name}"
+    data_folder="${train_folder}/raw_data"
+    binarized_data_folder="${train_folder}/binarized_data"
+    supplemental_data_folder="${train_folder}/supplemental_data"
 
-    # If paths to files provided, just link
-    if [ -n "${pp_existing_data_folder}" ]; then
-        printf "\n\n%s\n\n" "🤗 Existing data folder found: ${pp_existing_data_folder}"
-        printf "\n\n%s\n\n" "Using that instead of preprocessing again..."
+    env | rg '^randseg' | tee ${supplemental_data_folder}/relevant_environment_variables.txt
 
-        sleep 3
-        ln_or_cp_cmd=$(
-            test "${pp_ln_or_cp_cmd}" = "ln" \
-            && echo "ln -s" || echo "cp"
-        )
-        for txt_fname in "ngrams" "kb" "links"
-        do
-            ${ln_or_cp_cmd} \
-                "$(realpath ${pp_existing_data_folder}/${txt_fname}.txt)" \
-                "${supplemental_data_folder}/${txt_fname}.txt"
+    src=${randseg_source_language}
+    tgt=${randseg_target_language}
+
+    # Train BPE/RandBPE using the train seg
+    for language in "${src}" "${tgt}"; do
+        codes=${supplemental_data_folder}/${language}.bpe.codes
+
+        echo "[${language}] Learning BPE on train..."
+        learn_bpe \
+            "${data_folder}/train.${language}" \
+            "${randseg_num_merges}" \
+            "${codes}" \
+            "${randseg_pick_randomly}" \
+            "${randseg_random_seed}"
+
+        for split in "train" "dev" "test"; do
+            echo "[${language}, ${split}] Segmenting with BPE..."
+            text_file="${data_folder}/${split}.${language}"
+            out_file=${supplemental_data_folder}/${split}.bpe.${language}
+            apply_bpe \
+                "${text_file}" \
+                "${codes}" \
+                "${out_file}"
         done
-        for split in "train" "dev" "test"
-        do
-            case $split in
-                "train")
-                    split_fname="$(basename ${pp_train_file})" ;;
-                "dev"|"valid"|"validation")
-                    split_fname="$(basename ${pp_dev_file})" ;;
-                "test")
-                    split_fname="$(basename ${pp_test_file})" ;;
-            esac
-            ${ln_or_cp_cmd} \
-                "$(realpath ${pp_existing_data_folder}/${split_fname}.softgazfeats.npz)" \
-                "${supplemental_data_folder}/${split_fname}.softgazfeats.npz"
-        done
+        vocab_file=${supplemental_data_folder}/bpe_vocab.${language}
+        train_bpe_segmented="${supplemental_data_folder}/train.bpe.${language}"
+        get_vocab "${train_bpe_segmented}" "${vocab_file}"
+    done
 
-    else
-        if [ -n "${pp_paranames_tsv_file}" ]; then
+    fairseq-preprocess \
+        --source-lang "${src}" --target-lang "${tgt}" \
+        --trainpref "${supplemental_data_folder}/train.bpe" \
+        --validpref "${supplemental_data_folder}/dev.bpe" \
+        --testpref "${supplemental_data_folder}/test.bpe" \
+        --destdir "${randseg_binarized_data_folder}" \
+        --workers "${randseg_num_parallel_workers}"
 
-            printf "\n\n%s\n\n" \
-                "🤔 Retrieving links based on ParaNames file: $(basename ${pp_paranames_tsv_file})" &&
-                sleep 3
-
-            pp_kb_file=$pp_kb_output_file
-            pp_links_file=$pp_links_output_file
-
-            python data/get_ngrams.py \
-                --n "${pp_ngram_size}" \
-                --filenames \
-                ${data_folder}/${pp_train_file} \
-                ${data_folder}/${pp_dev_file} \
-                ${data_folder}/${pp_test_file} \
-                --output "${pp_ngrams_output_file}"
-
-            disamb_flag=$(
-                test "${pp_should_disambiguate}" = "false" &&
-                    echo "--dont_disambiguate" ||
-                    echo "--disambiguation_rules ${pp_disambiguation_rules}"
-            )
-
-            python data/create_kb_and_links_paranames.py \
-                --ngrams_file "${pp_ngrams_output_file}" \
-                --paranames_tsv "${pp_paranames_tsv_file}" \
-                --kb_out "${pp_kb_file}" \
-                --links_out "${pp_links_file}" ${disamb_flag}
-        fi
-
-        # Check that we have a KB and links file
-        for varname in "pp_kb_file" "pp_links_file"; do
-            test -z "$(echo $varname)" && echo "UNDEFINED VARIABLE $varname" && exit 1
-        done
-
-        cp -v $pp_kb_file $pp_kb_output_file || echo
-        cp -v $pp_links_file $pp_links_output_file || echo
-
-        for split_file in \
-            "${data_folder}/${pp_train_file}" \
-            "${data_folder}/${pp_dev_file}" \
-            "${data_folder}/${pp_test_file}"; do
-            python code/create_softgaz_features.py \
-                --candidates "${pp_links_file}" \
-                --kb "${pp_kb_file}" \
-                --conll_file "${split_file}" \
-                --normalize --feats all \
-                --output_folder "${supplemental_data_folder}" \
-                --ner_types "${pp_ner_types}"
-        done
-    fi
     echo "✅ Done!"
 
 }
@@ -183,12 +145,67 @@ preprocess() {
 train() {
     echo "❗ Starting training..."
 
-    data_folder="${ec_root_folder}/${ec_experiment_name}/train/${ec_model_name}/raw_data"
-    supplemental_data_folder="${ec_root_folder}/${ec_experiment_name}/train/${ec_model_name}/supplemental_data"
-    train_log_file="${ec_root_folder}/${ec_experiment_name}/train/${ec_model_name}/train.log"
+    train_folder="${randseg_root_folder}/${randseg_experiment_name}/train/${randseg_model_name}"
+    data_folder="${train_folder}/raw_data"
+    binarized_data_folder="${train_folder}/binarized_data"
+    checkpoints_folder="${train_folder}/checkpoints"
+    supplemental_data_folder="${train_folder}/supplemental_data"
+    train_log_file="${train_folder}/train.log"
+
+    cpu_gpu_fp16_flag=$(test -z "${cuda_visible}" && echo "--cpu" || echo "--fp16")
+
+    src=${randseg_source_language}
+    tgt=${randseg_target_language}
+
+    warmup_updates_flag="--warmup-updates=${randseg_warmup_updates}"
+
+    if [[ "${LR_SCHEDULER}" == "inverse_sqrt" ]]; then
+        warmup_init_lr_flag="--warmup-init-lr=${randseg_warmup_init_lr}"
+    else
+        warmup_init_lr_flag=""
+    fi
+
+    fairseq-train \
+        "${binarized_data_folder}" \
+        ${cpu_gpu_fp16_flag} ${warmup_updates_flag} ${warmup_init_lr_flag} \
+        --save-dir="${checkpoints_folder}" \
+        --source-lang="${src}" \
+        --target-lang="${tgt}" \
+        --log-format="json" \
+        --seed="${randseg_random_seed}" \
+        --patience=${randseg_patience} \
+        --arch=transformer \
+        --attention-dropout="${randseg_p_dropout}" \
+        --activation-dropout="${randseg_p_dropout}" \
+        --activation-fn="${randseg_activation_fn}" \
+        --encoder-embed-dim="${randseg_encoder_embedding_dim}" \
+        --encoder-ffn-embed-dim="${randseg_encoder_hidden_size}" \
+        --encoder-layers="${randseg_encoder_layers}" \
+        --encoder-attention-heads="${randseg_encoder_attention_heads}" \
+        --encoder-normalize-before \
+        --decoder-embed-dim="${randseg_decoder_embedding_dim}" \
+        --decoder-ffn-embed-dim="${randseg_decoder_hidden_size}" \
+        --decoder-layers="${randseg_decoder_layers}" \
+        --decoder-attention-heads="${randseg_decoder_attention_heads}" \
+        --decoder-normalize-before \
+        --share-decoder-input-output-embed \
+        --criterion="${randseg_criterion}" \
+        --label-smoothing="${randseg_label_smoothing}" \
+        --optimizer="${randseg_optimizer}" \
+        --lr="${randseg_lr}" \
+        --lr-scheduler="${randseg_lr_scheduler}" \
+        --clip-norm="${randseg_clip_norm}" \
+        --batch-size="${randseg_batch_size}" \
+        --max-update="${randseg_max_update}" \
+        --save-interval="${randseg_save_interval}" \
+        --validate-interval-updates="${randseg_validate_interval_updates}" \
+        --adam-betas '(0.9, 0.98)' --update-freq="${randseg_update_freq}" \
+        --no-epoch-checkpoints \
+        --max-source-positions=2500 --max-target-positions=2500 \
+        --skip-invalid-size-inputs-valid-test |
+        tee "${train_log_file}"
 
     echo "✅ Done training..."
-    echo "❗ Moving outputs and checkpoints to experiment folder..."
     echo "✅ Done!"
 }
 
@@ -202,24 +219,20 @@ evaluate() {
 
 main() {
     local config=$1
-    local language=${2:-""}
-    local should_confirm_commands=${3:-"true"}
+    local should_confirm_commands=${2:-"true"}
 
-    [ -z "${language}" ] &&
-        source "${config}" ||
-        source "${config}" "${language}"
+    source "${config}"
 
     confirm_commands_flag=$(
         test "${should_confirm_commands}" = "false" &&
             echo "cat" ||
-            echo "fzf --sync --tac --multi"
+            echo "fzf --sync --multi"
     )
 
     echo check_deps check_env create_experiment preprocess train evaluate |
         tr " " "\n" |
         ${confirm_commands_flag} |
         while read command; do
-            echo $command
             if [ "$command" = "evaluate" ]; then
                 for split in "dev" "test"; do evaluate $split; done
             else
@@ -228,4 +241,8 @@ main() {
         done
 }
 
-main "${config_file}" "${language}" "${should_confirm}"
+main "${config_file}" "${should_confirm}"
+
+# IDEAS / TODO
+# - environment should be printed into supplemental data
+# - binarized data folder creation needs to happen
