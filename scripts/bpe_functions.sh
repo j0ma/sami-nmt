@@ -2,38 +2,6 @@
 
 set -euo pipefail
 
-text_file=$1
-out_file=$2
-vocab_file=$3
-codes_file=$4
-num_operations=$5
-pick_randomly=${6:-yes}
-random_bpe_seed=${7}
-
-check_these_vars=(
-    "text_file"
-    "out_file"
-    "vocab_file"
-    "codes_file"
-    "num_operations"
-    "pick_randomly"
-    "random_bpe_seed"
-)
-
-check_args() {
-    echo "❗ Checking environment..."
-
-    # First check mandatory variables
-    for var in "${check_these_vars[@]}"; do
-        eval "test -z \$$var" &&
-            echo "Missing variable: $var" &&
-            missing="true" || missing="false"
-    done
-    test "$missing" = "true" && exit 1
-
-    echo "✅  Environment seems OK"
-}
-
 learn_bpe() {
     local text_file=$1
     local num_operations=$2
@@ -105,4 +73,3 @@ main() {
     get_vocab "${out_file}" "${vocab_file}"
 }
 
-main $text_file $out_file $vocab_file $codes_file $num_operations $pick_randomly $random_bpe_seed
