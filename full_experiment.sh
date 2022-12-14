@@ -149,7 +149,6 @@ train() {
     checkpoints_folder="${train_folder}/checkpoints"
     supplemental_data_folder="${train_folder}/supplemental_data"
     train_log_file="${train_folder}/train.log"
-
     cpu_gpu_fp16_flag=$(test -z "${cuda_visible}" && echo "--cpu" || echo "--fp16")
 
     src=${randseg_source_language}
@@ -208,111 +207,69 @@ train() {
 }
 
 evaluate() {
-    local split=$1
+
+    # Fairseq insists on calling the dev-set "valid"; hack around this.
+    local split="${1/dev/valid}"
+
+    train_folder="${randseg_root_folder}/${randseg_experiment_name}/train/${randseg_model_name}"
+    eval_folder="${randseg_root_folder}/${randseg_experiment_name}/train/${randseg_model_name}/eval"
+    data_folder="${eval_folder}/raw_data"
+    binarized_data_folder="${train_folder}/binarized_data"
+    checkpoints_folder="${train_folder}/checkpoints"
+    supplemental_data_folder="${train_folder}/supplemental_data"
+    train_log_file="${train_folder}/train.log"
+    cpu_gpu_fp16_flag=$(test -z "${cuda_visible}" && echo "--cpu" || echo "--fp16")
+
+    src=${randseg_source_language}
+    tgt=${randseg_target_language}
+
+
     echo "❗ [${split}] Evaluating..."
 
-### BEGIN IMPORT
-
-    if [[ -z $BEAM ]]; then
-        readonly BEAM=5
+    if [[ -z $randseg_beam_size ]]; then
+        readonly randseg_beam_size=5
     fi
 
-    RAW_DATA_FOLDER="${EXPERIMENT_FOLDER}/raw_data"
+    CHECKPOINT_FILE="${eval_folder}/checkpoint"
 
-    echo "DATA_BIN_FOLDER=${DATA_BIN_FOLDER}"
-    echo "CHECKPOINT_FOLDER=${CHECKPOINT_FOLDER}"
-    echo "MODE=${MODE}"
-    echo "BEAM=${BEAM}"
-    echo "SEED=${SEED}"
-    echo "RAW_DATA_FOLDER=${RAW_DATA_FOLDER}"
 
-    # Prediction options.
+    OUT="${eval_folder}/${split}.out"
+    SOURCE_TSV="${eval_folder}/${split}_with_source.tsv"
+    GOLD="${eval_folder}/${split}.gold"
+    HYPS="${eval_folder}/${split}.hyps"
+    SOURCE="${eval_folder}/${split}.source"
+    SCORE="${eval_folder}/${split}.eval.score"
+    SCORE_TSV="${eval_folder}/${split}_eval_results.tsv"
 
-        local -r DATA_BIN_FOLDER="$1"
-        shift
-        local -r EXPERIMENT_FOLDER="$1"
-        shift
-        local -r CHECKPOINT_FOLDER="$1"
-        shift
-        local -r MODE="$1"
-        shift
-        local -r BEAM_SIZE="$1"
-        shift
-        local -r SEED="$1"
-        shift
+    # Make raw predictions
+    fairseq-generate \
+        "${binarized_data_folder}" \
+        --source-lang="${src}" \
+        --target-lang="${tgt}" \
+        --path="${CHECKPOINT_FILE}" \
+        --seed="${randseg_random_seed}" \
+        --gen-subset="${split}" \
+        --beam="${randseg_beam_size}" \
+        --no-progress-bar | tee "${OUT}"
 
-        echo "seed = ${SEED}"
+    # Also separate gold/system output/source into separate text files
+    # (Sort by index to ensure output is in the same order as plain text data)
+    cat "${OUT}" | grep '^T-' | sed "s/^T-//g" | sort -k1 -n | cut -f2 >"${GOLD}"
+    cat "${OUT}" | grep '^H-' | sed "s/^H-//g" | sort -k1 -n | cut -f3 >"${HYPS}"
+    cat "${OUT}" | grep '^S-' | sed "s/^S-//g" | sort -k1 -n | cut -f2 >"${SOURCE}"
 
-        # Checkpoint file
-        CHECKPOINT_FILE="${CHECKPOINT_FOLDER}/checkpoint_best.pt"
-        if [[ ! -f "${CHECKPOINT_FILE}" ]]; then
-            echo "${CHECKPOINT_FILE} not found. Changing..."
-            CHECKPOINT_FILE="${CHECKPOINT_FILE/checkpoint_best/checkpoint_last}"
-            echo "Changed checkpoint file to: ${CHECKPOINT_FILE}"
-        fi
+    paste "${GOLD}" "${HYPS}" "${SOURCE}" >"${SOURCE_TSV}"
 
-        # Fairseq insists on calling the dev-set "valid"; hack around this.
-        local -r FAIRSEQ_MODE="${MODE/dev/valid}"
+    # Compute some evaluation metrics
+    python scripts/evaluate.py \
+        --references-path "${GOLD}" \
+        --hypotheses-path "${HYPS}" \
+        --source-path "${SOURCE}" \
+        --score-output-path "${SCORE}" \
+        --output-as-tsv
 
-        OUT="${EVAL_OUTPUT_FOLDER}/${MODE}.out"
-        SOURCE_TSV="${EVAL_OUTPUT_FOLDER}/${MODE}_with_source.tsv"
-        SOURCE_LANGS_TSV="${EVAL_OUTPUT_FOLDER}/${MODE}_with_source_and_langs.tsv"
-        GOLD="${EVAL_OUTPUT_FOLDER}/${MODE}.gold"
-        HYPS="${EVAL_OUTPUT_FOLDER}/${MODE}.hyps"
-        SOURCE="${EVAL_OUTPUT_FOLDER}/${MODE}.source"
-        LANGS="${EVAL_OUTPUT_FOLDER}/${MODE}.languages"
-        SCORE="${EVAL_OUTPUT_FOLDER}/${MODE}.eval.score"
-        SCORE_TSV="${EVAL_OUTPUT_FOLDER}/${MODE}_eval_results.tsv"
-
-        echo "Evaluating into ${OUT}"
-
-        # Make raw predictions
-        fairseq-generate \
-            "${DATA_BIN_FOLDER}" \
-            --source-lang="src" \
-            --target-lang="tgt" \
-            --path="${CHECKPOINT_FILE}" \
-            --seed="${SEED}" \
-            --gen-subset="${FAIRSEQ_MODE}" \
-            --beam="${BEAM_SIZE}" \
-            --no-progress-bar | tee "${OUT}"
-
-        # Also separate gold/system output/source into separate text files
-        # (Sort by index to ensure output is in the same order as plain text data)
-        cat "${OUT}" | grep '^T-' | sed "s/^T-//g" | sort -k1 -n | cut -f2 >"${GOLD}"
-        cat "${OUT}" | grep '^H-' | sed "s/^H-//g" | sort -k1 -n | cut -f3 >"${HYPS}"
-        cat "${OUT}" | grep '^S-' | sed "s/^S-//g" | sort -k1 -n | cut -f2 >"${SOURCE}"
-
-        #if [ -z "$LANGS_FILE" ]; then
-            #echo "Inferring languages from Fairseq output"
-            #cat "${OUT}" | grep '^S-' | cut -f2 | grep -P -o "^<.*>" | cut -f1 -d' ' | tr -d '<>' >"${LANGS}"
-        #else
-            #echo "Outputting languages from ${LANGS_FILE} if needed"
-            #cat "${LANGS_FILE}" >"${LANGS}.tmp"
-            #[ -e "${LANGS}" ] && echo "Backing up existing file: ${LANGS}" && cp ${LANGS} ${LANGS}.bak
-            #mv "${LANGS}.tmp" "${LANGS}"
-        #fi
-        #paste "${GOLD}" "${HYPS}" "${SOURCE}" >"${SOURCE_TSV}"
-        #paste "${SOURCE_TSV}" "${LANGS}" >"${SOURCE_LANGS_TSV}"
-
-        ## Compute some evaluation metrics
-        #python scripts/evaluate.py \
-            #--references-path "${GOLD}" \
-            #--hypotheses-path "${HYPS}" \
-            #--languages-path "${LANGS}" \
-            #--source-path "${SOURCE}" \
-            #--score-output-path "${SCORE}"
-
-        #python scripts/evaluate.py \
-            #--tsv "${SOURCE_LANGS_TSV}" \
-            #--score-output-path "${SCORE}" \
-            #--output-as-tsv
-
-        ## Finally output the score so Guild.ai grab it
-        #cat "${SCORE}"
-
-### END IMPORT
-
+    # Finally output the score so Guild.ai grab it
+    cat "${SCORE}"
 
     echo "✅ Done!"
 
