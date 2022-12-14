@@ -228,7 +228,6 @@ evaluate() {
 
     # Prediction options.
 
-    evaluate() {
         local -r DATA_BIN_FOLDER="$1"
         shift
         local -r EXPERIMENT_FOLDER="$1"
@@ -313,7 +312,6 @@ evaluate() {
         #cat "${SCORE}"
 
 ### END IMPORT
-
 
 
     echo "✅ Done!"
