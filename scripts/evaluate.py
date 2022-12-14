@@ -152,32 +152,34 @@ class ExperimentResults:
             while True:
                 yield "global"
 
-        with read_text(hypotheses_path) as hyp, read_text(
-            references_path
-        ) as ref, read_text(source_path) as src, (
+        langs_iterator = (
             read_text(languages_path) if languages_path else global_lang_generator()
-        ) as langs:
-            languages = set()
-            system_outputs = []
+        )
+        hyps_iterator = read_text(hypotheses_path)
+        refs_iterator = read_text(references_path)
+        src_iterator = read_text(source_path)
 
-            for hyp_line, ref_line, src_line, langs_line in it.zip_longest(
-                hyp, ref, src, langs
-            ):
+        languages = set()
+        system_outputs = []
 
-                # grab hypothesis lines
-                hypothesis = hyp_line.strip()
-                reference = ref_line.strip()
-                source = src_line.strip()
-                language = langs_line.strip()
-                languages.add(language)
-                system_outputs.append(
-                    TranslationOutput(
-                        language=language,
-                        reference=reference,
-                        hypothesis=hypothesis,
-                        source=source,
-                    )
+        for line in zip(hyps_iterator, refs_iterator, src_iterator, langs_iterator):
+
+            hyp_line, ref_line, src_line, langs_line = line
+
+            # grab hypothesis lines
+            hypothesis = hyp_line.strip()
+            reference = ref_line.strip()
+            source = src_line.strip()
+            language = langs_line.strip()
+            languages.add(language)
+            system_outputs.append(
+                TranslationOutput(
+                    language=language,
+                    reference=reference,
+                    hypothesis=hypothesis,
+                    source=source,
                 )
+            )
 
             return system_outputs, languages
 
@@ -257,7 +259,7 @@ class ExperimentResults:
         rows = [attr.asdict(self.metrics_dict[lang].metrics) for lang in _languages]
         out = (
             pd.DataFrame(rows)
-            .drop(columns=["rounding", "token_err", "bleu"])
+            .drop(columns=["rounding", "token_err"])
             .rename(
                 columns={
                     "token_acc": "Accuracy",
