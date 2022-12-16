@@ -148,6 +148,7 @@ train() {
     binarized_data_folder="${train_folder}/binarized_data"
     checkpoints_folder="${train_folder}/checkpoints"
     supplemental_data_folder="${train_folder}/supplemental_data"
+    tensorboard_folder="${train_folder}/tensorboard"
     train_log_file="${train_folder}/train.log"
     cpu_gpu_fp16_flag=$(test -z "${cuda_visible}" && echo "--cpu" || echo "--fp16")
 
@@ -166,6 +167,7 @@ train() {
         "${binarized_data_folder}" \
         ${cpu_gpu_fp16_flag} ${warmup_updates_flag} ${warmup_init_lr_flag} \
         --save-dir="${checkpoints_folder}" \
+        --tensorboard-logdir="${tensorboard_folder}" \
         --source-lang="${src}" \
         --target-lang="${tgt}" \
         --log-format="json" \
@@ -223,7 +225,6 @@ evaluate() {
     src=${randseg_source_language}
     tgt=${randseg_target_language}
 
-
     echo "❗ [${split}] Evaluating..."
 
     if [[ -z $randseg_beam_size ]]; then
@@ -231,7 +232,6 @@ evaluate() {
     fi
 
     CHECKPOINT_FILE="${eval_folder}/checkpoint"
-
 
     OUT="${eval_folder}/${split}.out"
     SOURCE_TSV="${eval_folder}/${split}_with_source.tsv"
