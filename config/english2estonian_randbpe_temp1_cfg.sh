@@ -11,6 +11,6 @@ export randseg_checkpoints_folder=./bin/randseg_ckpt_eng_est_randbpe_${randseg_r
 export randseg_binarized_data_folder=./bin/randseg_bindata_eng_est_randbpe_${randseg_random_seed}_$(date +%s)
 export randseg_source_language=eng
 export randseg_target_language=est
-export randseg_uniform=yes
+export randseg_temperature=1.0
 
 mkdir -p $randseg_checkpoints_folder $randseg_binarized_data_folder
