@@ -29,3 +29,5 @@ export randseg_validate_interval_updates="5000"
 export randseg_warmup_init_lr="0.001"
 export randseg_warmup_updates="1000"
 export randseg_update_freq=16
+export randseg_uniform="no"
+export randseg_temperature=1.0

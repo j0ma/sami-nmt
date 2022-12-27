@@ -116,6 +116,8 @@ preprocess() {
             "${randseg_num_merges}" \
             "${codes}" \
             "${randseg_pick_randomly}" \
+            "${randseg_uniform}" \
+            "${randseg_temperature}" \
             "${randseg_random_seed}"
 
         for split in "train" "dev" "test"; do

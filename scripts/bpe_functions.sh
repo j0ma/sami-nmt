@@ -7,13 +7,28 @@ learn_bpe() {
     local num_operations=$2
     local codes_file=$3
     local pick_randomly=$4
-    local random_bpe_seed=$5
+    local uniform=$5
+    local temperature=$6
+    local random_bpe_seed=$7
 
-    pick_randomly_flag=$(
-        test "${pick_randomly}" = "yes" &&
-            echo "--pick-randomly --random-seed-for-merges ${random_bpe_seed}" ||
-            echo ""
-    )
+    pick_randomly_flag=""
+   
+    if [ "${pick_randomly}" = "yes" ]; then
+        pick_randomly_flag="${pick_randomly_flag} --pick-randomly"
+
+        if [ "${uniform}" = "yes" ] 
+        then
+            pick_randomly_flag="${pick_randomly_flag} --uniform"
+        fi
+        if [ -n "${temperature}" ] 
+        then
+            pick_randomly_flag="${pick_randomly_flag} --temperature ${temperature}"
+        fi
+        if [ -n "${random_bpe_seed}" ] 
+        then
+            pick_randomly_flag="${pick_randomly_flag} --random-seed-for-merges ${random_bpe_seed}"
+        fi
+    fi
 
     subword-nmt learn-bpe \
         $pick_randomly_flag \
@@ -56,7 +71,9 @@ main() {
     local codes_file=$4
     local num_operations=$5
     local pick_randomly=$6
-    local random_bpe_seed=$7
+    local uniform=$7
+    local temperature=$8
+    local random_bpe_seed=$9
 
     check_args
     learn_bpe \
@@ -64,6 +81,8 @@ main() {
         "${num_operations}" \
         "${codes_file}" \
         "${pick_randomly}" \
+        "${uniform}" \
+        "${temperature}" \
         "${random_bpe_seed}"
     apply_bpe \
         "${text_file}" \
