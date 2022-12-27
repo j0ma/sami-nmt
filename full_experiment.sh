@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Complete experiment sequence
-set -eox pipefail
+set -eo pipefail
 
 # Constants
 config_file=$1
@@ -24,7 +24,11 @@ check_these_vars=(
     "randseg_target_language"
 )
 
-# Step 0: Dependencies
+activate_conda_env () {
+    source /home/$(whoami)/miniconda3/etc/profile.d/conda.sh
+    conda activate randseg
+}
+
 check_deps() {
     echo "❗  Checking dependencies..."
     while read -r dep; do
@@ -36,7 +40,7 @@ check_deps() {
 }
 
 fill_optionals() {
-    . config/default_hparams.sh
+    source config/default_hparams.sh
 }
 
 add_metadata() {
@@ -258,6 +262,19 @@ evaluate() {
     cat "${OUT}" | grep '^H-' | sed "s/^H-//g" | sort -k1 -n | cut -f3 >"${HYPS}"
     cat "${OUT}" | grep '^S-' | sed "s/^S-//g" | sort -k1 -n | cut -f2 >"${SOURCE}"
 
+    # Detokenize
+    SOURCE_ORIG=$SOURCE
+    SOURCE=${SOURCE}.detok
+    reverse_bpe_segmentation $SOURCE_ORIG $SOURCE
+
+    GOLD_ORIG=$GOLD
+    GOLD=${GOLD}.detok
+    reverse_bpe_segmentation $GOLD_ORIG $GOLD
+
+    HYPS_ORIG=$HYPS
+    HYPS=${HYPS}.detok
+    reverse_bpe_segmentation $HYPS_ORIG $HYPS
+
     paste "${GOLD}" "${HYPS}" "${SOURCE}" >"${SOURCE_TSV}"
 
     # Compute some evaluation metrics
@@ -280,6 +297,8 @@ main() {
     local should_confirm_commands=${2:-"true"}
 
     source "${config}"
+
+    activate_conda_env
 
     confirm_commands_flag=$(
         test "${should_confirm_commands}" = "false" &&
