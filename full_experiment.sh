@@ -3,6 +3,9 @@
 # Complete experiment sequence
 set -eo pipefail
 
+echo "Execution environment:"
+env
+
 # Constants
 config_file=$1
 should_confirm=${2:-"true"}
