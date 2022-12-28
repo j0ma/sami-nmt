@@ -8,7 +8,7 @@
 #SBATCH --qos=low-gpu
 #SBATCH --export=ALL
 #SBATCH --requeue
-#SBATCH --gres=gpu:V100:1
+#SBATCH --gres=gpu:V100:10
 #SBATCH --mail-user=jonnesaleva@brandeis.edu
 #SBATCH --mail-type=ALL
 
@@ -21,10 +21,28 @@ get_nth_row () {
     head -n $nth | tail -n 1
 }
 
-hparams=$(tail -n +2 config/sweep_conditions.tsv | get_nth_row ${SLURM_ARRAY_TASK_ID})
-export randseg_random_seed=$(echo $hparams | cut -f1 -d' ')
-export randseg_num_merges=$(echo $hparams | cut -f2 -d' ')
-export randseg_temperature=$(echo $hparams | cut -f3 -d' ')
+run_single_exp () {
+    local gpu_idx=$1
+    shift
+    local hparams=$1
+    shift
 
-./full_experiment.sh \
-    "${randseg_cfg_file}" false false
+    export randseg_random_seed=$(echo $hparams | cut -f1 -d' ')
+    export randseg_num_merges=$(echo $hparams | cut -f2 -d' ')
+    export randseg_temperature=$(echo $hparams | cut -f3 -d' ')
+
+    CUDA_VISIBLE_DEVICES=${gpu_idx} ./full_experiment.sh "${randseg_cfg_file}" false false
+
+}
+
+export -f get_nth_row
+export -f run_single_exp
+
+
+gpus=$(echo $CUDA_VISIBLE_DEVICES | tr "," " ")
+num_gpus=$(echo $CUDA_VISIBLE_DEVICES | tr "," "\n" | wc -l)
+taskid=${SLURM_ARRAY_TASK_ID}
+hparams_file=config/sweep_conditions${taskid}.tsv
+echo "Number of GPUs: $num_gpus"
+
+parallel --jobs $num_gpus --link "run_single_exp {1} {2}" ::: ${gpus} :::: $hparams_file
