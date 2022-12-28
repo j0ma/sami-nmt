@@ -12,3 +12,4 @@ export randseg_binarized_data_folder=./bin/sweep_randseg_bindata_eng_est_randbpe
 export randseg_model_name=transformer_randbpe_${randseg_num_merges}mops_${randseg_random_seed}_temperature${randseg_temperature}
 
 mkdir -p $randseg_checkpoints_folder $randseg_binarized_data_folder
+export randseg_batch_size="256"

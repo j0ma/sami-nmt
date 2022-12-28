@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 export randseg_activation_fn="relu"
-export randseg_batch_size="256"
+#export randseg_batch_size="256"
 export randseg_beam_size=5
 export randseg_clip_norm="1"
 export randseg_criterion="label_smoothed_cross_entropy"
