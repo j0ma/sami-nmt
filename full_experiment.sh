@@ -61,7 +61,10 @@ create_temp_folder() {
 check_env() {
     echo "❗ Checking environment..."
 
-    # First check mandatory variables
+    # First fill optionals with defaults
+    fill_optionals
+
+    # Then check mandatory variables
     missing=false
     for var in "${check_these_vars[@]}"; do
         eval "test -z \$$var" &&
@@ -69,9 +72,6 @@ check_env() {
             missing="true"
     done
     test "$missing" = "true" && exit 1
-
-    # Then check and fill optionals
-    fill_optionals
 
     echo "✅  Environment seems OK"
 }
