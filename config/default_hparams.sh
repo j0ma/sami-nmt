@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 export randseg_activation_fn="relu"
-export randseg_batch_size="666"
+export randseg_batch_size="256"
 export randseg_beam_size=5
 export randseg_clip_norm="1"
 export randseg_criterion="label_smoothed_cross_entropy"
@@ -18,7 +18,7 @@ export randseg_label_smoothing="0.1"
 export randseg_langs_file=""
 export randseg_lr="0.0003"
 export randseg_lr_scheduler="inverse_sqrt"
-export randseg_max_update="90000"
+export randseg_max_update="30000"
 export randseg_num_parallel_workers=16
 export randseg_optimizer="adam"
 export randseg_patience="3"
@@ -30,4 +30,4 @@ export randseg_warmup_init_lr="0.001"
 export randseg_warmup_updates="1000"
 export randseg_update_freq=16
 export randseg_uniform="no"
-export randseg_temperature=1.0
+#export randseg_temperature=1.0
