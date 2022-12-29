@@ -203,7 +203,7 @@ train() {
         --lr="${randseg_lr}" \
         --lr-scheduler="${randseg_lr_scheduler}" \
         --clip-norm="${randseg_clip_norm}" \
-        --batch-size="${randseg_batch_size}" \
+        --max-tokens="${randseg_max_tokens}" \
         --max-update="${randseg_max_update}" \
         --save-interval="${randseg_save_interval}" \
         --validate-interval-updates="${randseg_validate_interval_updates}" \
