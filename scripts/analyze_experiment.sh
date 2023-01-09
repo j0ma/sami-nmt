@@ -2,19 +2,7 @@
 
 set -euo pipefail
 
-seq_len_chars () {
-    sed \
-        -e "s/\(\s\|\t\)*//g" \
-        -e "s/./ &/g" \
-        -e "s/\(^\s\|\s$\)//g" \
-        -e "s/\s/\n/g" \
-        | tr " " "\n" \
-        | wc -l
-}
-
-seq_len_tokens () {
-    sed "s/\s/\n/g" | tr " " "\n" | wc -l
-}
+. scripts/seq_length_functions.sh
 
 experiment_path=$1
 sweep_cfg_folder=${2:-""}
