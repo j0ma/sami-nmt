@@ -2,6 +2,20 @@
 
 set -euo pipefail
 
+seq_len_chars () {
+    sed \
+        -e "s/\(\s\|\t\)*//g" \
+        -e "s/./ &/g" \
+        -e "s/\(^\s\|\s$\)//g" \
+        -e "s/\s/\n/g" \
+        | tr " " "\n" \
+        | wc -l
+}
+
+seq_len_tokens () {
+    sed "s/\s/\n/g" | tr " " "\n" | wc -l
+}
+
 experiment_path=$1
 sweep_cfg_folder=${2:-""}
 
@@ -23,3 +37,4 @@ else
     echo "Num started: ${num_started} / ${n_total_configs}"
     echo "Num finished: ${num_finished} / ${n_total_configs}"
 fi
+
