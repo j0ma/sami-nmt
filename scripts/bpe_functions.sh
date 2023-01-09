@@ -100,3 +100,18 @@ get_rank_freq_stats () {
         | xsv select -d "\t" 1,3,2 \
         | xsv fmt -t "\t"
 }
+
+
+seq_len_chars () {
+    sed \
+        -e "s/\(\s\|\t\)*//g" \
+        -e "s/./ &/g" \
+        -e "s/\(^\s\|\s$\)//g" \
+        -e "s/\s/\n/g" \
+        | tr " " "\n" \
+        | wc -l
+}
+
+seq_len_tokens () {
+    sed "s/\s/\n/g" | tr " " "\n" | wc -l
+}
