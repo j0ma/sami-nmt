@@ -67,6 +67,9 @@ check_env() {
     # First fill optionals with defaults
     fill_optionals
 
+    # Then source the config
+    source "${config}"
+
     # Then check mandatory variables
     missing=false
     for var in "${check_these_vars[@]}"; do
@@ -89,7 +92,7 @@ create_experiment() {
         --train-name="${randseg_model_name}" \
         --raw-data-folder="${randseg_raw_data_folder}" \
         --checkpoints-folder="${randseg_checkpoints_folder}" \
-        --binarized-data-folder="${randseg_binarized_data_folder}"
+        --binarized-data-folder="${randseg_binarized_data_folder}" || echo "Error creating experiment folder! Maybe it exists already?"
 
     echo "✅  Done!"
 }
@@ -301,8 +304,6 @@ main() {
     local config=$1
     local should_confirm_commands=${2:-"true"}
 
-    source "${config}"
-
     activate_conda_env
 
     confirm_commands_flag=$(
@@ -311,7 +312,11 @@ main() {
             echo "fzf --sync --multi"
     )
 
-    echo check_deps check_env create_experiment preprocess train evaluate |
+    # These should always happen
+    check_deps
+    check_env
+
+    echo create_experiment preprocess train evaluate |
         tr " " "\n" |
         ${confirm_commands_flag} |
         while read command; do

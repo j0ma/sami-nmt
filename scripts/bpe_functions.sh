@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
-
 learn_bpe() {
     local text_file=$1
     local num_operations=$2
@@ -92,3 +90,13 @@ main() {
     get_vocab "${out_file}" "${vocab_file}"
 }
 
+
+get_rank_freq_stats () {
+    local vocab_file=$1
+    cat -n ${vocab_file} \
+        | pee "echo rank token count" "cat" \
+        | sed "s/^\s*//g" \
+        | sed "s/\s/\t/g" \
+        | xsv select -d "\t" 1,3,2 \
+        | xsv fmt -t "\t"
+}
