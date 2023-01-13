@@ -12,5 +12,6 @@ export randseg_binarized_data_folder=./bin/sweep_randseg_bindata_eng_fin_randbpe
 export randseg_model_name=transformer_randbpe_${randseg_num_merges}mops_${randseg_random_seed}_temperature${randseg_temperature}
 
 mkdir -p $randseg_checkpoints_folder $randseg_binarized_data_folder
+
 export randseg_max_tokens="12000"
 export randseg_max_update="100000"
