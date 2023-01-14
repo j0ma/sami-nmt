@@ -6,6 +6,8 @@ set -eo pipefail
 echo "Execution environment:"
 env
 
+source scripts/bpe_functions.sh
+
 # Constants
 config_file=$1
 should_confirm=${2:-"true"}
@@ -99,8 +101,6 @@ create_experiment() {
 
 preprocess() {
     echo "❗ Preprocessing..."
-
-    . scripts/bpe_functions.sh
 
     train_folder="${randseg_root_folder}/${randseg_experiment_name}/train/${randseg_model_name}"
     data_folder="${train_folder}/raw_data"
