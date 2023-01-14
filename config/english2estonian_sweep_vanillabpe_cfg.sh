@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export randseg_experiment_name=english2estonian_vanillabpe_100kupdates
+export randseg_experiment_name=english2estonian_vanillabpe
 export randseg_pick_randomly=no
 export randseg_uniform=no
 export randseg_root_folder=./experiments
@@ -14,4 +14,4 @@ export randseg_model_name=transformer_vanillabpe_${randseg_num_merges}mops_${ran
 mkdir -p $randseg_checkpoints_folder $randseg_binarized_data_folder
 
 export randseg_max_tokens="12000"
-export randseg_max_update="100000"
+export randseg_max_update="25000"
