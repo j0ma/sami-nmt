@@ -11,7 +11,7 @@
 #SBATCH --gres=gpu:V100:10
 #SBATCH --mail-user=jonnesaleva@brandeis.edu
 #SBATCH --mail-type=ALL
-#SBATCH --output=sweep-%x-%j.out
+#SBATCH --output=%x-%j.out
 
 env
 
