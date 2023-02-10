@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
 
-#SBATCH --cpus-per-task=32
-#SBATCH --mem=64G
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=8G
 #SBATCH --ntasks=1
 #SBATCH --account=guest
-#SBATCH --partition=guest-gpu
-#SBATCH --qos=low-gpu
+#SBATCH --partition=guest-compute
+#SBATCH --qos=low
 #SBATCH --export=ALL
 #SBATCH --requeue
-#SBATCH --gres=gpu:1
 #SBATCH --mail-user=jonnesaleva@brandeis.edu
 #SBATCH --mail-type=ALL
-#SBATCH --output=analyze-experiment-%j.out
+#SBATCH --output=scratch/slurmlog/analyze-experiment-%j.out
 
 test -z "${randseg_exp_folder}" && exit 1
 test -z "${randseg_cfg_folder}" && exit 1
@@ -25,6 +24,7 @@ activate_conda_env () {
 
 activate_conda_env
 
+target_language=${target_language} analyze_further=yes \
 bash scripts/analyze_experiment.sh \
     "${randseg_exp_folder}" \
     "${randseg_cfg_folder}"

@@ -14,4 +14,6 @@ export randseg_model_name=transformer_uniform_randbpe_${randseg_num_merges}mops_
 mkdir -p $randseg_checkpoints_folder $randseg_binarized_data_folder
 
 export randseg_max_tokens="36000"
-export randseg_max_update="10000"
+export randseg_max_update="12000"
+export randseg_lr="0.01"
+export randseg_warmup_updates="500"

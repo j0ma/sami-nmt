@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export randseg_experiment_name=english2finnish
+export randseg_experiment_name=english2finnish_randbpe
 export randseg_pick_randomly=yes
 export randseg_uniform=no
 export randseg_root_folder=./experiments
@@ -14,4 +14,4 @@ export randseg_model_name=transformer_randbpe_${randseg_num_merges}mops_${randse
 mkdir -p $randseg_checkpoints_folder $randseg_binarized_data_folder
 
 export randseg_max_tokens="36000"
-export randseg_max_update="25000"
+export randseg_max_update="10000"

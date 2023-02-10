@@ -8,6 +8,7 @@ experiment_path=$1
 sweep_cfg_folder=${2:-""}
 
 tgt_lang=${target_language:-uzb}
+should_analyze_further=${analyze_further:-""}
 
 # constants
 train_folder="$experiment_path/train"
@@ -31,21 +32,32 @@ fi
 
 PS3="Should we get BLEU results and analyze the vocabulary? "
 
-select should_analyze_further in "yes" "no"
-do
-    if [ "${should_analyze_further}" = "yes" ]; then
-        # Sweep results (BLEU)
-        echo "Getting sweep results..."
-        parallel --tag --bar --progress \
-            "tail -n 1 {1} | cut -f2" ::: \
-            $eval_folder/*/valid.eval.score | \
-            sort | tee $experiment_path/sweep_results.tsv
+if [ -z "${should_analyze_further}" ]
+then
+    select should_analyze_further in "yes" "no"
+    do
+        export should_analyze_further=${should_analyze_further}
+        break
+    done
+fi
 
-        # Analyze the text data
-        echo "Analyzing BPE text data..."
-        parallel --jobs 1 --bar --progress \
-            "bash scripts/analyze_text_data.sh {1} eng ${tgt_lang}" ::: \
-            $(find $train_folder -type d -name supplemental_data)
-    fi
-    break
-done
+if [ "${should_analyze_further}" = "yes" ]; then
+
+    # Sweep results (BLEU)
+    echo "Getting sweep results..."
+    parallel --tag --bar --progress \
+        "tail -n 1 {1} | cut -f2" ::: \
+        $eval_folder/*/valid.eval.score | \
+        sort | tee $experiment_path/sweep_results_valid.tsv
+
+    parallel --tag --bar --progress \
+        "tail -n 1 {1} | cut -f2" ::: \
+        $eval_folder/*/test.eval.score | \
+        sort | tee $experiment_path/sweep_results_test.tsv
+
+    # Analyze the text data
+    echo "Analyzing BPE text data..."
+    parallel --jobs 1 --bar --progress \
+        "bash scripts/analyze_text_data.sh {1} eng ${tgt_lang}" ::: \
+        $(find $train_folder -type d -name supplemental_data)
+fi

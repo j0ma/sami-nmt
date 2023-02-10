@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-export randseg_experiment_name=english2estonian_randbpe
+export randseg_experiment_name=english2estonian_uniform_randbpe
 export randseg_pick_randomly=yes
-export randseg_uniform=no
+export randseg_uniform=yes
 export randseg_root_folder=./experiments
 export randseg_raw_data_folder=./data/dpe-data/eng-est/tokenized
 export randseg_source_language=eng

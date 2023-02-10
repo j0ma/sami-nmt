@@ -27,6 +27,10 @@ check_these_vars=(
     "randseg_checkpoints_folder"
     "randseg_source_language"
     "randseg_target_language"
+    "randseg_should_create_experiment"
+	"randseg_should_preprocess"
+	"randseg_should_train"
+	"randseg_should_evaluate"
 )
 
 activate_conda_env () {
@@ -213,6 +217,9 @@ train() {
         --adam-betas '(0.9, 0.98)' --update-freq="${randseg_update_freq}" \
         --no-epoch-checkpoints \
         --max-source-positions=2500 --max-target-positions=2500 \
+        --eval-bleu \
+        --eval-bleu-remove-bpe \
+        --eval-bleu-detok "moses" \
         --skip-invalid-size-inputs-valid-test |
         tee "${train_log_file}"
 
@@ -254,15 +261,15 @@ evaluate() {
     SCORE_TSV="${eval_folder}/${split}_eval_results.tsv"
 
     # Make raw predictions
-    fairseq-generate \
-        "${binarized_data_folder}" \
-        --source-lang="${src}" \
-        --target-lang="${tgt}" \
-        --path="${CHECKPOINT_FILE}" \
-        --seed="${randseg_random_seed}" \
-        --gen-subset="${split}" \
-        --beam="${randseg_beam_size}" \
-        --no-progress-bar | tee "${OUT}"
+    #fairseq-generate \
+        #"${binarized_data_folder}" \
+        #--source-lang="${src}" \
+        #--target-lang="${tgt}" \
+        #--path="${CHECKPOINT_FILE}" \
+        #--seed="${randseg_random_seed}" \
+        #--gen-subset="${split}" \
+        #--beam="${randseg_beam_size}" \
+        #--no-progress-bar | tee "${OUT}"
 
     # Also separate gold/system output/source into separate text files
     # (Sort by index to ensure output is in the same order as plain text data)
@@ -270,7 +277,7 @@ evaluate() {
     cat "${OUT}" | grep '^H-' | sed "s/^H-//g" | sort -k1 -n | cut -f3 >"${HYPS}"
     cat "${OUT}" | grep '^S-' | sed "s/^S-//g" | sort -k1 -n | cut -f2 >"${SOURCE}"
 
-    # Detokenize
+    # Detokenize fairseq output
     SOURCE_ORIG=$SOURCE
     SOURCE=${SOURCE}.detok
     reverse_bpe_segmentation $SOURCE_ORIG $SOURCE
@@ -300,6 +307,12 @@ evaluate() {
 
 }
 
+construct_command () {
+    local flag=$1
+    local command_name=$2
+    test "${flag}" = "yes" && echo "${command_name}" || echo "skip"
+}
+
 main() {
     local config=$1
     local should_confirm_commands=${2:-"true"}
@@ -316,11 +329,18 @@ main() {
     check_deps
     check_env
 
-    echo create_experiment preprocess train evaluate |
+    create_experiment_flag=$(construct_command $randseg_should_create_experiment create_experiment)
+    preprocess_flag=$(construct_command $randseg_should_preprocess preprocess)
+    train_flag=$(construct_command $randseg_should_train train)
+    evaluate_flag=$(construct_command $randseg_should_evaluate evaluate)
+
+    echo "$create_experiment_flag" "$preprocess_flag" "$train_flag" "$evaluate_flag" |
         tr " " "\n" |
         ${confirm_commands_flag} |
         while read command; do
-            if [ "$command" = "evaluate" ]; then
+            if [ "$command" = "skip" ]; then
+                continue
+            elif [ "$command" = "evaluate" ]; then
                 for split in "dev" "test"; do evaluate $split; done
             else
                 $command
