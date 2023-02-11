@@ -251,6 +251,7 @@ evaluate() {
     fi
 
     CHECKPOINT_FILE="${eval_folder}/checkpoint"
+    UNTOUCHED_DETOK_REF="${eval_folder}/raw_data/${split}.detok.${tgt}"
 
     OUT="${eval_folder}/${split}.out"
     SOURCE_TSV="${eval_folder}/${split}_with_source.tsv"
@@ -261,15 +262,15 @@ evaluate() {
     SCORE_TSV="${eval_folder}/${split}_eval_results.tsv"
 
     # Make raw predictions
-    #fairseq-generate \
-        #"${binarized_data_folder}" \
-        #--source-lang="${src}" \
-        #--target-lang="${tgt}" \
-        #--path="${CHECKPOINT_FILE}" \
-        #--seed="${randseg_random_seed}" \
-        #--gen-subset="${split}" \
-        #--beam="${randseg_beam_size}" \
-        #--no-progress-bar | tee "${OUT}"
+    fairseq-generate \
+        "${binarized_data_folder}" \
+        --source-lang="${src}" \
+        --target-lang="${tgt}" \
+        --path="${CHECKPOINT_FILE}" \
+        --seed="${randseg_random_seed}" \
+        --gen-subset="${split}" \
+        --beam="${randseg_beam_size}" \
+        --no-progress-bar | tee "${OUT}"
 
     # Also separate gold/system output/source into separate text files
     # (Sort by index to ensure output is in the same order as plain text data)

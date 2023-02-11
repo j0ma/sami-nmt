@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export randseg_experiment_name=english2finnish_uniformbpe
+#export randseg_experiment_name=english2finnish_uniformbpe
 export randseg_pick_randomly=yes
 export randseg_uniform=yes
 export randseg_root_folder=./experiments

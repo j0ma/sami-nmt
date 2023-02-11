@@ -46,18 +46,18 @@ if [ "${should_analyze_further}" = "yes" ]; then
     # Sweep results (BLEU)
     echo "Getting sweep results..."
     parallel --tag --bar --progress \
-        "tail -n 1 {1} | cut -f2" ::: \
-        $eval_folder/*/valid.eval.score | \
+        "cat" ::: \
+        $eval_folder/*/valid.eval.score_sacrebleu | \
         sort | tee $experiment_path/sweep_results_valid.tsv
 
     parallel --tag --bar --progress \
-        "tail -n 1 {1} | cut -f2" ::: \
-        $eval_folder/*/test.eval.score | \
+        "cat" ::: \
+        $eval_folder/*/test.eval.score_sacrebleu | \
         sort | tee $experiment_path/sweep_results_test.tsv
 
     # Analyze the text data
-    echo "Analyzing BPE text data..."
-    parallel --jobs 1 --bar --progress \
-        "bash scripts/analyze_text_data.sh {1} eng ${tgt_lang}" ::: \
-        $(find $train_folder -type d -name supplemental_data)
+    #echo "Analyzing BPE text data..."
+    #parallel --jobs 1 --bar --progress \
+        #"bash scripts/analyze_text_data.sh {1} eng ${tgt_lang}" ::: \
+        #$(find $train_folder -type d -name supplemental_data)
 fi

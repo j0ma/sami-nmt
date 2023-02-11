@@ -57,8 +57,7 @@ get_vocab() {
 reverse_bpe_segmentation() {
     local text_file=$1
     local out_file=$2
-    sed -r 's/(@@ )|(@@ ?$)//g' <"${text_file}" \
-        | sacremoses detokenize >"${out_file}"
+    sed -r 's/(@@ )|(@@ ?$)//g' <"${text_file}" | sacremoses detokenize >"${out_file}"
 }
 
 main() {

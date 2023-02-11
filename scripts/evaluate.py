@@ -162,6 +162,9 @@ class ExperimentResults:
         languages = set()
         system_outputs = []
 
+        from itertools import zip_longest
+
+        import pudb; pudb.set_trace()
         for line in zip(hyps_iterator, refs_iterator, src_iterator, langs_iterator):
 
             hyp_line, ref_line, src_line, langs_line = line
@@ -170,7 +173,7 @@ class ExperimentResults:
             hypothesis = hyp_line.strip()
             reference = ref_line.strip()
             source = src_line.strip()
-            language = langs_line.strip()
+            language = "global" if not langs_line else langs_line.strip()
             languages.add(language)
             system_outputs.append(
                 TranslationOutput(
@@ -181,7 +184,7 @@ class ExperimentResults:
                 )
             )
 
-            return system_outputs, languages
+        return system_outputs, languages
 
     @classmethod
     def outputs_from_combined_tsv(
