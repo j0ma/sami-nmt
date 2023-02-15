@@ -47,13 +47,23 @@ if [ "${should_analyze_further}" = "yes" ]; then
     echo "Getting sweep results..."
     parallel --tag --bar --progress \
         "cat" ::: \
-        $eval_folder/*/valid.eval.score_sacrebleu | \
-        sort | tee $experiment_path/sweep_results_valid.tsv
+        $eval_folder/*/valid.eval.score_sacrebleu_bleu | \
+        sort | tee $experiment_path/sweep_results_valid_bleu.tsv
 
     parallel --tag --bar --progress \
         "cat" ::: \
-        $eval_folder/*/test.eval.score_sacrebleu | \
-        sort | tee $experiment_path/sweep_results_test.tsv
+        $eval_folder/*/valid.eval.score_sacrebleu_chrf | \
+        sort | tee $experiment_path/sweep_results_valid_chrf.tsv
+
+    parallel --tag --bar --progress \
+        "cat" ::: \
+        $eval_folder/*/test.eval.score_sacrebleu_bleu | \
+        sort | tee $experiment_path/sweep_results_test_bleu.tsv
+
+    parallel --tag --bar --progress \
+        "cat" ::: \
+        $eval_folder/*/test.eval.score_sacrebleu_chrf | \
+        sort | tee $experiment_path/sweep_results_test_chrf.tsv
 
     # Analyze the text data
     #echo "Analyzing BPE text data..."

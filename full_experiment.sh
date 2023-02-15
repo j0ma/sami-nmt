@@ -301,7 +301,6 @@ evaluate() {
         --score-output-path "${SCORE}" \
         --output-as-tsv
 
-    # Finally output the score so Guild.ai grab it
     cat "${SCORE}"
 
     echo "✅ Done!"

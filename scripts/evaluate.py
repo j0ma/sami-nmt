@@ -164,7 +164,6 @@ class ExperimentResults:
 
         from itertools import zip_longest
 
-        import pudb; pudb.set_trace()
         for line in zip(hyps_iterator, refs_iterator, src_iterator, langs_iterator):
 
             hyp_line, ref_line, src_line, langs_line = line
