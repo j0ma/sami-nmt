@@ -1,32 +1,59 @@
+#!/usr/bin/env python
+
+import json
+import pudb
+import click
 from pathlib import Path
-import sys
+from collections import Counter
+from rich.progress import track
 
-def oov_rate(train, held_out):
-    train = set(train)
-    held_out = set(held_out)
-    oov = held_out - train
-    return len(oov) / len(held_out), oov
 
-def get_vocab(fp):
-    lines = []
-    with open(fp) as f:
-        for line in f:
-            for tok in line.split(" "):
-                lines.append(tok.strip())
-    return lines
+def construct_vocab(f):
+    output = Counter()
 
-def main():
-    train, held_out = sys.argv[1:3]
-    vocab_train = read_text(train)
-    vocab_held_out = read_text(held_out)
+    for sentence in track(f, description=f"Constructing vocab: {f.name}"):
+        tokens = sentence.split(" ")
+        output.update(tokens)
 
-    oov_r, oovs = oov_rate(vocab_train, vocab_held_out)
-    oov_r = round(oov_r, 3)
+    return output
 
-    print(f"{train}\t{held_out}\t{oov_r}")
 
-    print("Here are some OOVs:")
-    print("\n".join(list(oovs)[:10]))
+@click.command()
+@click.argument("train_file", type=click.File(mode="r", encoding="utf-8"))
+@click.argument("dev_file", type=click.File(mode="r", encoding="utf-8"))
+@click.argument("test_file", type=click.File(mode="r", encoding="utf-8"))
+def analyze_oov(train_file, dev_file, test_file):
+
+    # construct vocabs from flies
+    train_vocab = construct_vocab(train_file)
+    dev_vocab = construct_vocab(dev_file)
+    test_vocab = construct_vocab(test_file)
+
+    train_dev_diff = dev_vocab - train_vocab
+    train_test_diff = test_vocab - train_vocab
+
+    train_dev_overlap = train_vocab & dev_vocab
+    train_test_overlap = train_vocab & test_vocab
+    train_dev_union = train_vocab | dev_vocab
+    train_test_union = train_vocab | test_vocab
+
+    dev_oov_rate = len(train_dev_diff) / len(dev_vocab)
+    test_oov_rate = len(train_test_diff) / len(test_vocab)
+
+    dev_iou_rate = len(train_dev_overlap) / len(train_dev_union)
+    test_iou_rate = len(train_test_overlap) / len(train_test_union)
+
+    out_json_dict = {
+        "oov_dev": dev_oov_rate,
+        "oov_test": test_oov_rate,
+        "iou_dev": dev_iou_rate,
+        "iou_test": test_iou_rate,
+        "language": train_file.name.split(".")[-1]
+    }
+    out_json = json.dumps(out_json_dict)
+
+    click.echo(out_json, nl=True)
+
 
 if __name__ == "__main__":
-    main()
+    analyze_oov()
