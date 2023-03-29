@@ -145,9 +145,16 @@ preprocess() {
         get_vocab "${train_bpe_segmented}" "${vocab_file}"
     done
 
+    if [ "${randseg_train_on_dev}" = "yes" ]
+    then
+        trainpref="${supplemental_data_folder}/dev.bpe"
+    else
+        trainpref="${supplemental_data_folder}/train.bpe"
+    fi
+
     fairseq-preprocess \
         --source-lang "${src}" --target-lang "${tgt}" \
-        --trainpref "${supplemental_data_folder}/train.bpe" \
+        --trainpref "${trainpref}" \
         --validpref "${supplemental_data_folder}/dev.bpe" \
         --testpref "${supplemental_data_folder}/test.bpe" \
         --destdir "${randseg_binarized_data_folder}" \

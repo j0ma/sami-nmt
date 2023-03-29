@@ -30,6 +30,7 @@ export randseg_warmup_init_lr="0.001"
 export randseg_warmup_updates="1000"
 export randseg_update_freq=16
 export randseg_uniform="no"
+export randseg_train_on_dev="no"
 
 #export randseg_should_create_experiment=yes
 #export randseg_should_preprocess=yes
