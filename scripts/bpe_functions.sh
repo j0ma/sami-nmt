@@ -18,7 +18,8 @@ learn_bpe() {
         if [ "${uniform}" = "yes" ] 
         then
             pick_randomly_flag="${pick_randomly_flag} --uniform"
-        elif [ "${count_proportional}" = "yes" ] 
+        elif [ "${count_proportional}" = "yes" ]
+        then
             pick_randomly_flag="${pick_randomly_flag} --count-proportional"
         fi
 
