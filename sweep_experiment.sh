@@ -8,7 +8,7 @@
 #SBATCH --qos=low-gpu
 #SBATCH --export=ALL
 #SBATCH --requeue
-#SBATCH --gres=gpu:V100:1
+#SBATCH --gres=gpu:V100:10
 #SBATCH --mail-user=jonnesaleva@brandeis.edu
 #SBATCH --mail-type=ALL
 #SBATCH --output=%x-%j.out
