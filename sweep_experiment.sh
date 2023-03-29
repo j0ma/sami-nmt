@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
-#SBATCH --cpus-per-task=32
-#SBATCH --mem=32G
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=16G
 #SBATCH --ntasks=1
 #SBATCH --account=guest
 #SBATCH --partition=guest-gpu
 #SBATCH --qos=low-gpu
 #SBATCH --export=ALL
 #SBATCH --requeue
-#SBATCH --gres=gpu:V100:10
+#SBATCH --gres=gpu:V100:1
 #SBATCH --mail-user=jonnesaleva@brandeis.edu
 #SBATCH --mail-type=ALL
 #SBATCH --output=%x-%j.out
