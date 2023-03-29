@@ -270,6 +270,7 @@ evaluate() {
         --seed="${randseg_random_seed}" \
         --gen-subset="${split}" \
         --beam="${randseg_beam_size}" \
+        --max-source-positions=2500 --max-target-positions=2500 \
         --no-progress-bar | tee "${OUT}"
 
     # Also separate gold/system output/source into separate text files

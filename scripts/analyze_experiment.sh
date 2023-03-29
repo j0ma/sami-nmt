@@ -9,6 +9,7 @@ sweep_cfg_folder=${2:-""}
 
 tgt_lang=${target_language:-uzb}
 should_analyze_further=${analyze_further:-""}
+split=${split:-test}
 
 # constants
 train_folder="$experiment_path/train"
@@ -17,7 +18,7 @@ supp_folder="$train_folder/supplemental_data"
 
 # how many started/finished?
 num_started=$(ls $train_folder | wc -l)
-num_finished=$(find $eval_folder -name valid.eval.score | wc -l)
+num_finished=$(find $eval_folder -name ${split}.eval.score | wc -l)
 
 if [ -z "${sweep_cfg_folder}" ]; then
     echo "Experiment: ${experiment_path}"

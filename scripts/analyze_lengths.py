@@ -19,9 +19,14 @@ for input_file in input_files:
 # Compute mean, median, and standard deviation of for each input file
 results = []
 for input_file in input_files:
-    mean = statistics.mean(num_tokens[input_file])
-    median = statistics.median(num_tokens[input_file])
-    std_dev = statistics.stdev(num_tokens[input_file])
+    try:
+        mean = statistics.mean(num_tokens[input_file])
+        median = statistics.median(num_tokens[input_file])
+        std_dev = statistics.stdev(num_tokens[input_file])
+    except statistics.StatisticsError:
+        print(f"Skipping: {input_file}", file=sys.stderr)
+        continue
+
     results.append([input_file, "Mean", mean])
     results.append([input_file, "Median", median])
     results.append([input_file, "Standard deviation", std_dev])
