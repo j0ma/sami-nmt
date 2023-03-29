@@ -8,6 +8,7 @@ learn_bpe() {
     local uniform=$5
     local temperature=$6
     local random_bpe_seed=$7
+    local count_proportional=$8
 
     pick_randomly_flag=""
    
@@ -17,7 +18,10 @@ learn_bpe() {
         if [ "${uniform}" = "yes" ] 
         then
             pick_randomly_flag="${pick_randomly_flag} --uniform"
+        elif [ "${count_proportional}" = "yes" ] 
+            pick_randomly_flag="${pick_randomly_flag} --count-proportional"
         fi
+
         if [ -n "${temperature}" ] 
         then
             pick_randomly_flag="${pick_randomly_flag} --temperature ${temperature}"

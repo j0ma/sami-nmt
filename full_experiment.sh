@@ -128,7 +128,8 @@ preprocess() {
             "${randseg_pick_randomly}" \
             "${randseg_uniform}" \
             "${randseg_temperature}" \
-            "${randseg_random_seed}"
+            "${randseg_random_seed}" \
+            "${randseg_count_proportional}"
 
         for split in "train" "dev" "test"; do
             echo "[${language}, ${split}] Segmenting with BPE..."
