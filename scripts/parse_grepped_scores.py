@@ -13,7 +13,7 @@ def parse_hyperparameters(file_path):
     third_chunk = parts[5]
 
     hyperparams['language'] = first_chunk.split('_')[0].replace("english2", "")
-    hyperparams['bpe_type'] = first_chunk.split('_')[1]
+    hyperparams['bpe_type'] = "countprop" if "countprop" in file_path else first_chunk.split('_')[1]
     hyperparams['num_merges'] = int(first_chunk.split('_')[3].replace('k', '000'))
     hyperparams['temperature'] = float(second_chunk.split('_')[-1].replace('temperature', ''))
     hyperparams['seed'] = int(second_chunk.split('_')[-2].replace("_", ""))
