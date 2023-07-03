@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euox pipefail
+
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=16G
 #SBATCH --ntasks=1
@@ -29,13 +31,40 @@ run_single_exp () {
     local hparams=$1
     shift
 
-    export randseg_random_seed=$(echo $hparams | cut -f1 -d' ')
-    export randseg_num_merges=$(echo $hparams | cut -f2 -d' ')
-    export randseg_temperature=$(echo $hparams | cut -f3 -d' ')
+    export randseg_random_seed=1234 # same for all fin-sme
+    export randseg_temperature=1.0
 
-    echo "seed: ${randseg_random_seed}"
-    echo "mops: ${randseg_num_merges}"
-    echo "temp: ${randseg_temperature}"
+    export randseg_num_merges=$(echo $hparams | cut -f1 -d' ')
+    export randseg_train_data_type=$(echo $hparams | cut -f2 -d' ')
+
+    case $randseg_train_data_type in
+        baseline)
+            export randseg_raw_data_folder=./data/fin-sme
+            ;;
+        bt_nmt_all)
+            export randseg_raw_data_folder=./data/fin-sme/nmt_bt
+            ;;
+        bt_rbmt_all)
+            export randseg_raw_data_folder=./data/fin-sme/rbmt_bt
+            ;;
+        bt_nmt_clean)
+            export randseg_raw_data_folder=./data/fin-sme/clean_nmt_bt
+            ;;
+        bt_rbmt_clean)
+            export randseg_raw_data_folder=./data/fin-sme/clean_rbmt_bt
+            ;;
+        bt_nmt_all_rbmt_all)
+            export randseg_raw_data_folder=./data/fin-sme/rbmt_nmt_bt
+            ;;
+        bt_nmt_clean_rbmt_clean)
+            export randseg_raw_data_folder=./data/fin-sme/clean_rbmt_nmt_bt
+            ;;
+        bt_nmt_clean_rbmt_all)
+            export randseg_raw_data_folder=./data/fin-sme/clean_nmt_all_rbmt_bt
+            ;;
+        *)
+            exit
+    esac
 
     CUDA_VISIBLE_DEVICES=${gpu_idx} ./full_experiment.sh "${randseg_cfg_file}" false false
 
