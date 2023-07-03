@@ -224,12 +224,13 @@ train() {
         --validate-interval-updates="${randseg_validate_interval_updates}" \
         --adam-betas '(0.9, 0.98)' --update-freq="${randseg_update_freq}" \
         --no-epoch-checkpoints \
-        --max-source-positions=2500 --max-target-positions=2500 \
         --eval-bleu \
         --eval-bleu-remove-bpe \
         --eval-bleu-detok "moses" \
         --skip-invalid-size-inputs-valid-test |
         tee "${train_log_file}"
+
+        #--max-source-positions=2500 --max-target-positions=2500 \
 
     echo "✅ Done training..."
     echo "✅ Done!"
@@ -278,8 +279,9 @@ evaluate() {
         --seed="${randseg_random_seed}" \
         --gen-subset="${split}" \
         --beam="${randseg_beam_size}" \
-        --max-source-positions=2500 --max-target-positions=2500 \
         --no-progress-bar | tee "${OUT}"
+
+        #--max-source-positions=2500 --max-target-positions=2500 \
 
     # Also separate gold/system output/source into separate text files
     # (Sort by index to ensure output is in the same order as plain text data)

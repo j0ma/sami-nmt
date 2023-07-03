@@ -10,6 +10,8 @@ analysis/
 analysoi.sh
 eng_deu_bin
 eng_fin_bin
+*_bin/
+*_bin
 launch_5k_exps.sh
 relaunch_2k_exps.sh
 rerun_these_deleteme.txt
