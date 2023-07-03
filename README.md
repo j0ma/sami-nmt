@@ -1,1 +1,1 @@
-# Randomized BPE for machine translation
+# Sami NMT
