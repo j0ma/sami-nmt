@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -euox pipefail
-
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=16G
 #SBATCH --ntasks=1
@@ -10,9 +8,9 @@ set -euox pipefail
 #SBATCH --qos=low-gpu
 #SBATCH --export=ALL
 #SBATCH --requeue
-#SBATCH --gres=gpu:V100:10
+#SBATCH --gres=gpu:V100:8
 #SBATCH --mail-user=jonnesaleva@brandeis.edu
-#SBATCH --mail-type=ALL
+#SBATCH --mail-type=FAIL
 #SBATCH --output=%x-%j.out
 
 env
@@ -36,30 +34,39 @@ run_single_exp () {
 
     export randseg_num_merges=$(echo $hparams | cut -f1 -d' ')
     export randseg_train_data_type=$(echo $hparams | cut -f2 -d' ')
+    export randseg_direction=$(echo $hparams | cut -f3 -d' ')
 
     case $randseg_train_data_type in
         baseline)
             export randseg_raw_data_folder=./data/fin-sme
+            export randseg_cfg_file=./config/${randseg_direction}_cfg.sh
             ;;
         bt_nmt_all)
             export randseg_raw_data_folder=./data/fin-sme/nmt_bt
+            export randseg_cfg_file=./config/nmt_bt_${randseg_direction}_cfg.sh
             ;;
         bt_rbmt_all)
             export randseg_raw_data_folder=./data/fin-sme/rbmt_bt
+            export randseg_cfg_file=./config/rbmt_bt_${randseg_direction}_cfg.sh
             ;;
         bt_nmt_clean)
+            export randseg_cfg_file=./config/clean_nmt_bt_${randseg_direction}_cfg.sh
             export randseg_raw_data_folder=./data/fin-sme/clean_nmt_bt
             ;;
         bt_rbmt_clean)
+            export randseg_cfg_file=./config/clean_rbmt_bt_${randseg_direction}_cfg.sh
             export randseg_raw_data_folder=./data/fin-sme/clean_rbmt_bt
             ;;
         bt_nmt_all_rbmt_all)
+            export randseg_cfg_file=./config/rbmt_nmt_bt_${randseg_direction}_cfg.sh
             export randseg_raw_data_folder=./data/fin-sme/rbmt_nmt_bt
             ;;
         bt_nmt_clean_rbmt_clean)
+            export randseg_cfg_file=./config/clean_rbmt_nmt_bt_${randseg_direction}_cfg.sh
             export randseg_raw_data_folder=./data/fin-sme/clean_rbmt_nmt_bt
             ;;
         bt_nmt_clean_rbmt_all)
+            export randseg_cfg_file=./config/clean_nmt_all_rbmt_bt_${randseg_direction}_cfg.sh
             export randseg_raw_data_folder=./data/fin-sme/clean_nmt_all_rbmt_bt
             ;;
         *)
