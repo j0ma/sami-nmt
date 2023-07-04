@@ -13,4 +13,4 @@ export randseg_model_name=transformer_vanillabpe_clean_nmt_bt_${randseg_num_merg
 mkdir -p $randseg_checkpoints_folder $randseg_binarized_data_folder
 
 export randseg_max_tokens="3600" #0"
-export randseg_max_update="10000"
+export randseg_max_update="30000"
