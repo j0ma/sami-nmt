@@ -12,5 +12,5 @@ export randseg_model_name=transformer_vanillabpe_${randseg_num_merges}mops_${ran
 
 mkdir -p $randseg_checkpoints_folder $randseg_binarized_data_folder
 
-export randseg_max_tokens="3600" #0"
+export randseg_max_tokens="16000" 
 export randseg_max_update="30000"
