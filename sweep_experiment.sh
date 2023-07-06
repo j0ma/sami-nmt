@@ -10,7 +10,7 @@
 #SBATCH --requeue
 #SBATCH --gres=gpu:V100:8
 #SBATCH --mail-user=jonnesaleva@brandeis.edu
-#SBATCH --mail-type=FAIL
+#SBATCH --mail-type=FAIL,CANCEL
 #SBATCH --output=%x-%j.out
 
 env
