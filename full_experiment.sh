@@ -187,9 +187,16 @@ train() {
         warmup_init_lr_flag=""
     fi
 
+    if [ "${randseg_tie_all_embeddings}" == "yes" ]]; then
+        tie_embeddings_flag="--share-all-embeddings"
+    else
+        tie_embeddings_flag=""
+    fi
+
     fairseq-train \
         "${binarized_data_folder}" \
         ${cpu_gpu_fp16_flag} ${warmup_updates_flag} ${warmup_init_lr_flag} \
+        ${tie_embeddings_flag} \
         --save-dir="${checkpoints_folder}" \
         --tensorboard-logdir="${tensorboard_folder}" \
         --source-lang="${src}" \
