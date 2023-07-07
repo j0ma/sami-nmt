@@ -152,13 +152,22 @@ preprocess() {
         trainpref="${supplemental_data_folder}/train.bpe"
     fi
 
+    if [ "${randseg_tie_all_embeddings}" = "yes" ]; then
+        joined_dictionary_flag="--joined-dictionary"
+    else
+        joined_dictionary_flag=""
+    fi
+    echo "joined_dictionary_flag=${joined_dictionary_flag}"
+
+
     fairseq-preprocess \
         --source-lang "${src}" --target-lang "${tgt}" \
         --trainpref "${trainpref}" \
         --validpref "${supplemental_data_folder}/dev.bpe" \
         --testpref "${supplemental_data_folder}/test.bpe" \
         --destdir "${randseg_binarized_data_folder}" \
-        --workers "${randseg_num_parallel_workers}"
+        --workers "${randseg_num_parallel_workers}" \
+        ${joined_dictionary_flag}
 
     echo "✅ Done!"
 
@@ -187,11 +196,12 @@ train() {
         warmup_init_lr_flag=""
     fi
 
-    if [ "${randseg_tie_all_embeddings}" == "yes" ]]; then
+    if [ "${randseg_tie_all_embeddings}" = "yes" ]; then
         tie_embeddings_flag="--share-all-embeddings"
     else
-        tie_embeddings_flag=""
+        tie_embeddings_flag="--share-decoder-input-output-embed"
     fi
+    echo "tie_embeddings_flag=${tie_embeddings_flag}"
 
     fairseq-train \
         "${binarized_data_folder}" \
@@ -218,7 +228,6 @@ train() {
         --decoder-layers="${randseg_decoder_layers}" \
         --decoder-attention-heads="${randseg_decoder_attention_heads}" \
         --decoder-normalize-before \
-        --share-decoder-input-output-embed \
         --criterion="${randseg_criterion}" \
         --label-smoothing="${randseg_label_smoothing}" \
         --optimizer="${randseg_optimizer}" \
@@ -236,8 +245,6 @@ train() {
         --eval-bleu-detok "moses" \
         --skip-invalid-size-inputs-valid-test |
         tee "${train_log_file}"
-
-        #--max-source-positions=2500 --max-target-positions=2500 \
 
     echo "✅ Done training..."
     echo "✅ Done!"
