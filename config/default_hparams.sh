@@ -32,3 +32,5 @@ export randseg_update_freq=16
 export randseg_uniform="no"
 export randseg_train_on_dev="no"
 export randseg_tie_all_embeddings="yes"
+export randseg_encoder_normalize_before="no"
+export randseg_decoder_normalize_before="no"
