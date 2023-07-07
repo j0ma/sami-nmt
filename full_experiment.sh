@@ -7,6 +7,7 @@ echo "Execution environment:"
 env
 
 source scripts/bpe_functions.sh
+source scripts/sentencepiece_functions.sh
 
 # Constants
 config_file=$1
@@ -31,6 +32,7 @@ check_these_vars=(
 	"randseg_should_preprocess"
 	"randseg_should_train"
 	"randseg_should_evaluate"
+    "randseg_use_sentencepiece"
 )
 
 activate_conda_env () {
@@ -118,31 +120,55 @@ preprocess() {
 
     # Train BPE/RandBPE using the train seg
     for language in "${src}" "${tgt}"; do
-        codes=${supplemental_data_folder}/${language}.bpe.codes
 
-        echo "[${language}] Learning BPE on train..."
-        learn_bpe \
-            "${data_folder}/train.${language}" \
-            "${randseg_num_merges}" \
-            "${codes}" \
-            "${randseg_pick_randomly}" \
-            "${randseg_uniform}" \
-            "${randseg_temperature}" \
-            "${randseg_random_seed}" \
-            "${randseg_count_proportional}"
+        if [ "$randseg_use_sentencepiece" = "yes" ]
+        then
+            spm_model_vocab_prefix=${supplemental_data_folder}/${language}.spm
+            echo "[${language}] Learning SentencePiece ULM on train..."
+            echo "[${language}] Note: Vocab size will be taken from 'randseg_num_merges' env var"
+            train_sentencepiece_model \
+                "${data_folder}/train.${language}" \
+                "${spm_model_vocab_prefix}" \
+                "${randseg_num_merges}"
 
-        for split in "train" "dev" "test"; do
-            echo "[${language}, ${split}] Segmenting with BPE..."
-            text_file="${data_folder}/${split}.${language}"
-            out_file=${supplemental_data_folder}/${split}.bpe.${language}
-            apply_bpe \
-                "${text_file}" \
+            spm_model_file=$spm_model_vocab_prefix.model
+            spm_model_file=$spm_model_vocab_prefix.vocab
+
+            for split in "train" "dev" "test"; do
+                echo "[${language}, ${split}] Segmenting with SentencePiece ULM..."
+                text_file="${data_folder}/${split}.${language}"
+                out_file=${supplemental_data_folder}/${split}.spm.${language}
+                apply_sentencepiece_model \
+                    "${spm_model_file}" \
+                    "${text_file}" \
+                    "${out_file}"
+            done
+        else
+            codes=${supplemental_data_folder}/${language}.bpe.codes
+            echo "[${language}] Learning BPE on train..."
+            learn_bpe \
+                "${data_folder}/train.${language}" \
+                "${randseg_num_merges}" \
                 "${codes}" \
-                "${out_file}"
-        done
-        vocab_file=${supplemental_data_folder}/bpe_vocab.${language}
-        train_bpe_segmented="${supplemental_data_folder}/train.bpe.${language}"
-        get_vocab "${train_bpe_segmented}" "${vocab_file}"
+                "${randseg_pick_randomly}" \
+                "${randseg_uniform}" \
+                "${randseg_temperature}" \
+                "${randseg_random_seed}" \
+                "${randseg_count_proportional}"
+
+            for split in "train" "dev" "test"; do
+                echo "[${language}, ${split}] Segmenting with BPE..."
+                text_file="${data_folder}/${split}.${language}"
+                out_file=${supplemental_data_folder}/${split}.bpe.${language}
+                apply_bpe \
+                    "${text_file}" \
+                    "${codes}" \
+                    "${out_file}"
+            done
+            vocab_file=${supplemental_data_folder}/bpe_vocab.${language}
+            train_bpe_segmented="${supplemental_data_folder}/train.bpe.${language}"
+            get_vocab "${train_bpe_segmented}" "${vocab_file}"
+        fi
     done
 
     if [ "${randseg_train_on_dev}" = "yes" ]
