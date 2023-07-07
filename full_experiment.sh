@@ -203,10 +203,24 @@ train() {
     fi
     echo "tie_embeddings_flag=${tie_embeddings_flag}"
 
+    if [ "${randseg_encoder_normalize_before}" = "yes" ]; then
+        encoder_normalize_before_flag="--encoder-normalize-before"
+    else
+        encoder_normalize_before_flag=""
+    fi
+
+    if [ "${randseg_decoder_normalize_before}" = "yes" ]; then
+        decoder_normalize_before_flag="--decoder-normalize-before"
+    else
+        decoder_normalize_before_flag=""
+    fi
+
     fairseq-train \
         "${binarized_data_folder}" \
         ${cpu_gpu_fp16_flag} ${warmup_updates_flag} ${warmup_init_lr_flag} \
         ${tie_embeddings_flag} \
+        ${encoder_normalize_before_flag} \
+        ${decoder_normalize_before_flag} \
         --save-dir="${checkpoints_folder}" \
         --tensorboard-logdir="${tensorboard_folder}" \
         --source-lang="${src}" \
@@ -222,12 +236,10 @@ train() {
         --encoder-ffn-embed-dim="${randseg_encoder_hidden_size}" \
         --encoder-layers="${randseg_encoder_layers}" \
         --encoder-attention-heads="${randseg_encoder_attention_heads}" \
-        --encoder-normalize-before \
         --decoder-embed-dim="${randseg_decoder_embedding_dim}" \
         --decoder-ffn-embed-dim="${randseg_decoder_hidden_size}" \
         --decoder-layers="${randseg_decoder_layers}" \
         --decoder-attention-heads="${randseg_decoder_attention_heads}" \
-        --decoder-normalize-before \
         --criterion="${randseg_criterion}" \
         --label-smoothing="${randseg_label_smoothing}" \
         --optimizer="${randseg_optimizer}" \
