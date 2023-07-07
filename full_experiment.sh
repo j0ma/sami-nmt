@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Complete experiment sequence
-set -eo pipefail
+set -xeo pipefail
 
 echo "Execution environment:"
 env
@@ -105,6 +105,23 @@ create_experiment() {
     echo "✅  Done!"
 }
 
+reverse_subword_segmentation () {
+    local input_file=$1
+    local output_file=$2
+
+    if [ "$randseg_use_sentencepiece" = "yes" ]
+    then
+        reverse_bpe_segmentation \
+            "${input_file}" \
+            "${output_file}"
+    else
+        reverse_sentencepiece_segmentation \
+            "${input_file}" \
+            "${output_file}"
+    fi
+
+}
+
 preprocess() {
     echo "❗ Preprocessing..."
 
@@ -123,6 +140,7 @@ preprocess() {
 
         if [ "$randseg_use_sentencepiece" = "yes" ]
         then
+            subword_suffix="spm"
             spm_model_vocab_prefix=${supplemental_data_folder}/${language}.spm
             echo "[${language}] Learning SentencePiece ULM on train..."
             echo "[${language}] Note: Vocab size will be taken from 'randseg_num_merges' env var"
@@ -132,7 +150,7 @@ preprocess() {
                 "${randseg_num_merges}"
 
             spm_model_file=$spm_model_vocab_prefix.model
-            spm_model_file=$spm_model_vocab_prefix.vocab
+            spm_vocab_file=$spm_model_vocab_prefix.vocab
 
             for split in "train" "dev" "test"; do
                 echo "[${language}, ${split}] Segmenting with SentencePiece ULM..."
@@ -144,6 +162,7 @@ preprocess() {
                     "${out_file}"
             done
         else
+            subword_suffix="bpe"
             codes=${supplemental_data_folder}/${language}.bpe.codes
             echo "[${language}] Learning BPE on train..."
             learn_bpe \
@@ -173,9 +192,9 @@ preprocess() {
 
     if [ "${randseg_train_on_dev}" = "yes" ]
     then
-        trainpref="${supplemental_data_folder}/dev.bpe"
+        trainpref="${supplemental_data_folder}/dev.${subword_suffix}"
     else
-        trainpref="${supplemental_data_folder}/train.bpe"
+        trainpref="${supplemental_data_folder}/train.${subword_suffix}"
     fi
 
     if [ "${randseg_tie_all_embeddings}" = "yes" ]; then
@@ -189,8 +208,8 @@ preprocess() {
     fairseq-preprocess \
         --source-lang "${src}" --target-lang "${tgt}" \
         --trainpref "${trainpref}" \
-        --validpref "${supplemental_data_folder}/dev.bpe" \
-        --testpref "${supplemental_data_folder}/test.bpe" \
+        --validpref "${supplemental_data_folder}/dev.${subword_suffix}" \
+        --testpref "${supplemental_data_folder}/test.${subword_suffix}" \
         --destdir "${randseg_binarized_data_folder}" \
         --workers "${randseg_num_parallel_workers}" \
         ${joined_dictionary_flag}
@@ -293,6 +312,7 @@ evaluate() {
     # Fairseq insists on calling the dev-set "valid"; hack around this.
     local split="${1/dev/valid}"
 
+    experiment_folder="${randseg_root_folder}/${randseg_experiment_name}"
     train_folder="${randseg_root_folder}/${randseg_experiment_name}/train/${randseg_model_name}"
     eval_folder="${randseg_root_folder}/${randseg_experiment_name}/train/${randseg_model_name}/eval"
     data_folder="${eval_folder}/raw_data"
@@ -344,15 +364,15 @@ evaluate() {
     # Detokenize fairseq output
     SOURCE_ORIG=$SOURCE
     SOURCE=${SOURCE}.detok
-    reverse_bpe_segmentation $SOURCE_ORIG $SOURCE
+    reverse_subword_segmentation $SOURCE_ORIG $SOURCE
 
     GOLD_ORIG=$GOLD
     GOLD=${GOLD}.detok
-    reverse_bpe_segmentation $GOLD_ORIG $GOLD
+    reverse_subword_segmentation $GOLD_ORIG $GOLD
 
     HYPS_ORIG=$HYPS
     HYPS=${HYPS}.detok
-    reverse_bpe_segmentation $HYPS_ORIG $HYPS
+    reverse_subword_segmentation $HYPS_ORIG $HYPS
 
     paste "${GOLD}" "${HYPS}" "${SOURCE}" >"${SOURCE_TSV}"
 
@@ -363,6 +383,9 @@ evaluate() {
         --source-path "${SOURCE}" \
         --score-output-path "${SCORE}" \
         --output-as-tsv
+
+    # Compute more evals that were implemented later
+    bash scripts/rescore_experiment.sh ${experiment_folder}
 
     cat "${SCORE}"
 

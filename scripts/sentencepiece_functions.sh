@@ -13,7 +13,7 @@ train_sentencepiece_model() {
   fi
 
   # Train SentencePiece model
-  spm_train
+  spm_train \
 	 --input=$input_file \
 	 --model_prefix=$model_prefix \
 	 --vocab_size=$vocab_size \
@@ -33,7 +33,7 @@ apply_sentencepiece_model() {
   fi
 
   # Apply SentencePiece model
-  spm_encode
+  spm_encode \
 	 --model=$model_file \
 	 --output_format=piece \
      < $input_file \
@@ -53,6 +53,16 @@ get_sentencepiece_subword_vocabulary() {
 
   # Get SentencePiece subword vocabulary
   spm_export_vocab --model=$model_file --output_format=vocab > $output_file
+}
+
+reverse_sentencepiece_segmentation() {
+    local text_file=$1
+    local out_file=$2
+    sed -r \
+        -e 's/ //g' \
+        -e 's/▁/ /g' \
+        <"${text_file}" \
+    | sacremoses detokenize >"${out_file}"
 }
 
 # Export functions
