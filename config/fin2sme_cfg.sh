@@ -13,6 +13,4 @@ export randseg_model_name=baseline
 mkdir -p $randseg_checkpoints_folder $randseg_binarized_data_folder
 
 export randseg_max_tokens="16000" 
-export randseg_max_update="30000"
-
-export randseg_patience="50" 
+export randseg_max_update="15000"
