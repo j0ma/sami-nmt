@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Complete experiment sequence
-set -xeo pipefail
+set -eo pipefail
 
 echo "Execution environment:"
 env
@@ -384,9 +384,6 @@ evaluate() {
         --score-output-path "${SCORE}" \
         --output-as-tsv
 
-    # Compute more evals that were implemented later
-    bash scripts/rescore_experiment.sh ${experiment_folder}
-
     cat "${SCORE}"
 
     echo "✅ Done!"
@@ -428,6 +425,10 @@ main() {
                 continue
             elif [ "$command" = "evaluate" ]; then
                 for split in "dev" "test"; do evaluate $split; done
+
+                # Compute more evals that were implemented later
+                experiment_folder="${randseg_root_folder}/${randseg_experiment_name}"
+                bash scripts/rescore_experiment.sh ${experiment_folder}
             else
                 $command
             fi
