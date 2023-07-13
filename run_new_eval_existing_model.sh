@@ -1,0 +1,294 @@
+#!/usr/bin/env bash
+
+# Complete experiment sequence
+set -eo pipefail
+
+echo "Execution environment:"
+env
+
+source scripts/bpe_functions.sh
+source scripts/sentencepiece_functions.sh
+
+# Constants
+config_file=$1
+should_confirm=${2:-"true"}
+cuda_visible=${CUDA_VISIBLE_DEVICES:-""}
+
+check_these_vars=(
+    "randseg_random_seed"
+    "randseg_source_language"
+    "randseg_target_language"
+	"randseg_should_preprocess"
+    "randseg_use_sentencepiece"
+    "randseg_new_eval_name"
+    "randseg_new_eval_raw_data_folder"
+    "randseg_new_eval_binarized_data_folder"
+    "randseg_existing_train_folder"
+)
+
+activate_conda_env () {
+    source /home/$(whoami)/miniconda3/etc/profile.d/conda.sh
+    conda activate randseg
+}
+
+check_deps() {
+    echo "❗  Checking dependencies..."
+    while read -r dep; do
+        test -z "$(which $dep)" &&
+            echo "Missing dependency: ${dep}" &&
+            exit 1 || echo "Found ${dep} ➡  $(which $dep)"
+    done <requirements_external.txt
+    echo "✅  Dependencies seem OK"
+}
+
+fill_optionals() {
+    source config/default_hparams.sh
+}
+
+check_env() {
+    echo "❗ Checking environment..."
+
+    # First fill optionals with defaults
+    fill_optionals
+
+    # Then source the config
+    source "${config}" || exit
+
+    # Then check mandatory variables
+    missing=false
+    for var in "${check_these_vars[@]}"; do
+        eval "test -z \$$var" &&
+            echo "Missing variable: $var" &&
+            missing="true"
+    done
+    test "$missing" = "true" && exit 1
+
+    echo "✅  Environment seems OK"
+}
+
+create_eval_folder() {
+    echo "❗ Creating  eval folder"
+
+    local new_eval_name=${randseg_new_eval_name}
+    local raw_data_folder=${randseg_new_eval_raw_data_folder}
+    local binarized_data_folder=${randseg_new_eval_binarized_data_folder}
+    local train_folder=${randseg_existing_train_folder}
+
+    local experiments_folder=$(realpath ${train_folder}/../../../)
+    local experiment_name=$(basename $(realpath ${train_folder}/../../))
+
+    prepx create \
+        --eval-only \
+        --eval-name ${new_eval_name} \
+        --raw-data-folder ${raw_data_folder} \
+        --binarized-data-folder ${binarized_data_folder} \
+        --eval-checkpoint ${train_folder}/checkpoints/checkpoint_best.pt \
+        --root-folder ${experiments_folder} \
+        --experiment-name ${experiment_name} || echo "Failed to create eval! Maybe it exists already?"
+}
+
+
+preprocess() {
+    echo "❗ Preprocessing..."
+
+    local new_eval_name=${randseg_new_eval_name}
+    local train_folder=${randseg_existing_train_folder}
+    local supplemental_data_folder=${train_folder}/supplemental_data
+
+    local experiment_folder=$(realpath ${train_folder}/../../../)
+    local experiment_name=$(basename $(realpath ${train_folder}/../../))
+    local new_eval_folder="${experiment_folder}/${experiment_name}/eval/${new_eval_name}"
+
+    env | rg '^randseg' | tee ${new_eval_folder}/relevant_environment_variables.txt
+
+    src=${randseg_source_language}
+    tgt=${randseg_target_language}
+
+    # Train BPE/RandBPE using the train seg
+    for language in "${src}" "${tgt}"; do
+
+        if [ "$randseg_use_sentencepiece" = "yes" ]
+        then
+            subword_suffix="spm"
+            spm_model_vocab_prefix=${supplemental_data_folder}/${language}.spm
+            spm_model_file=${spm_model_vocab_prefix}.model
+            spm_vocab_file=${spm_model_vocab_prefix}.vocab
+            echo "[${language}, test] Segmenting with SentencePiece ULM..."
+            text_file="${new_eval_folder}/raw_data/test.${language}"
+            out_file=${new_eval_folder}/test.spm.${language}
+            apply_sentencepiece_model \
+                "${spm_model_file}" \
+                "${text_file}" \
+                "${out_file}"
+        else
+            subword_suffix="bpe"
+            codes=${supplemental_data_folder}/${language}.bpe.codes
+            echo "[${language}, test] Segmenting with BPE..."
+            text_file="${new_eval_folder}/raw_data/test.${language}"
+            out_file=${new_eval_folder}/test.bpe.${language}
+            apply_bpe \
+                "${text_file}" \
+                "${codes}" \
+                "${out_file}"
+        fi
+    done
+
+    if [ "${randseg_tie_all_embeddings}" = "yes" ]; then
+        joined_dictionary_flag="--joined-dictionary"
+    else
+        joined_dictionary_flag=""
+    fi
+    echo "joined_dictionary_flag=${joined_dictionary_flag}"
+    
+    fairseq-preprocess \
+        --source-lang "${src}" --target-lang "${tgt}" \
+        --srcdict ${train_folder}/binarized_data/dict.${src}.txt \
+        --testpref "${new_eval_folder}/test.${subword_suffix}" \
+        --destdir "${new_eval_folder}/binarized_data" \
+        --workers "${randseg_num_parallel_workers}" \
+        ${joined_dictionary_flag}
+
+    echo "✅ Done!"
+
+}
+
+
+reverse_subword_segmentation () {
+    local input_file=$1
+    local output_file=$2
+
+    if [ "$randseg_use_sentencepiece" = "yes" ]
+    then
+        reverse_bpe_segmentation \
+            "${input_file}" \
+            "${output_file}"
+    else
+        reverse_sentencepiece_segmentation \
+            "${input_file}" \
+            "${output_file}"
+    fi
+
+}
+
+evaluate() {
+
+    # Fairseq insists on calling the dev-set "valid"; hack around this.
+    local split="${1/dev/valid}"
+
+    local new_eval_name=${randseg_new_eval_name}
+    local train_folder=${randseg_existing_train_folder}
+    local supplemental_data_folder=${train_folder}/supplemental_data
+
+    local experiment_folder=$(realpath ${train_folder}/../../../)
+    local experiment_name=$(basename $(realpath ${train_folder}/../../))
+    local new_eval_folder="${experiment_folder}/${experiment_name}/eval/${new_eval_name}"
+
+    local data_folder="${new_eval_folder}/raw_data"
+    local binarized_data_folder="${new_eval_folder}/binarized_data"
+    local src=${randseg_source_language}
+    local tgt=${randseg_target_language}
+
+    echo "❗ [${split}] Evaluating..."
+
+    if [[ -z $randseg_beam_size ]]; then
+        readonly randseg_beam_size=5
+    fi
+
+    local checkpoint_file="${new_eval_folder}/checkpoint"
+    local out="${new_eval_folder}/${split}.out"
+    local source_tsv="${new_eval_folder}/${split}_with_source.tsv"
+    local gold="${new_eval_folder}/${split}.gold"
+    local hyps="${new_eval_folder}/${split}.hyps"
+    local source="${new_eval_folder}/${split}.source"
+    local score="${new_eval_folder}/${split}.eval.score"
+    local score_tsv="${new_eval_folder}/${split}_eval_results.tsv"
+
+    # Make raw predictions
+    fairseq-generate \
+        "${binarized_data_folder}" \
+        --source-lang="${src}" \
+        --target-lang="${tgt}" \
+        --path="${checkpoint_file}" \
+        --seed="${randseg_random_seed}" \
+        --gen-subset="${split}" \
+        --beam="${randseg_beam_size}" \
+        --no-progress-bar | tee "${out}"
+
+    # Also separate gold/system output/source into separate text files
+    # (Sort by index to ensure output is in the same order as plain text data)
+    cat "${out}" | grep '^T-' | sed "s/^T-//g" | sort -k1 -n | cut -f2 >"${gold}"
+    cat "${out}" | grep '^H-' | sed "s/^H-//g" | sort -k1 -n | cut -f3 >"${hyps}"
+    cat "${out}" | grep '^S-' | sed "s/^S-//g" | sort -k1 -n | cut -f2 >"${source}"
+
+    # Detokenize fairseq output
+    source_orig=$source
+    source=${source}.detok
+    reverse_subword_segmentation $source_orig $source
+
+    gold_orig=$gold
+    gold=${gold}.detok
+    reverse_subword_segmentation $gold_orig $gold
+
+    hyps_orig=$hyps
+    hyps=${hyps}.detok
+    reverse_subword_segmentation $hyps_orig $hyps
+
+    paste "${gold}" "${hyps}" "${source}" >"${source_tsv}"
+
+    # Compute some evaluation metrics
+    python scripts/evaluate.py \
+        --references-path "${gold}" \
+        --hypotheses-path "${hyps}" \
+        --source-path "${source}" \
+        --score-output-path "${score}" \
+        --output-as-tsv
+
+    cat "${score}"
+
+    echo "✅ Done!"
+
+}
+
+construct_command () {
+    local flag=$1
+    local command_name=$2
+    test "${flag}" = "yes" && echo "${command_name}" || echo "skip"
+}
+
+main() {
+    local config=$1
+    local should_confirm_commands=${2:-"true"}
+
+    activate_conda_env
+
+    confirm_commands_flag=$(
+        test "${should_confirm_commands}" = "false" &&
+            echo "cat" ||
+            echo "fzf --sync --multi"
+    )
+
+    # These should always happen
+    check_deps
+    check_env
+
+    preprocess_flag=$(construct_command $randseg_should_preprocess preprocess)
+    evaluate_flag=$(construct_command $randseg_should_evaluate evaluate)
+
+    # always create eval
+    create_eval_folder
+
+    # preprocess if necessary
+    if [ "$preprocess_flag" = "skip" ]; then
+        continue
+    else
+        preprocess
+    fi
+
+    # evaluate always
+    evaluate "test"
+
+    experiment_folder=$(realpath ${randseg_existing_train_folder}/../../)
+    bash scripts/rescore_experiment.sh ${experiment_folder}
+}
+
+main "${config_file}" "${should_confirm}"
