@@ -6,9 +6,9 @@ export randseg_root_folder=./experiments
 export randseg_raw_data_folder=./data/fin-sme
 export randseg_source_language=fin
 export randseg_target_language=sme
-export randseg_checkpoints_folder=./fin_sme_bin/sweep_randseg_ckpt_fin_sme_vanillabpe_${randseg_num_merges}mops_${randseg_random_seed}_temperature${randseg_temperature}_$(date +%s)
-export randseg_binarized_data_folder=./fin_sme_bin/sweep_randseg_bindata_fin_sme_vanillabpe_${randseg_num_merges}mops_${randseg_random_seed}_temperature${randseg_temperature}_$(date +%s)
 export randseg_model_name=baseline
+export randseg_checkpoints_folder=./fin_sme_bin/fin2sme_${randseg_model_name}_$(date +%s)
+export randseg_binarized_data_folder=./fin_sme_bin/fin2sme_${randseg_model_name}_$(date +%s)
 
 mkdir -p $randseg_checkpoints_folder $randseg_binarized_data_folder
 
