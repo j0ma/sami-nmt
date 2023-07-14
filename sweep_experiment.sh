@@ -69,6 +69,10 @@ run_single_exp () {
             export randseg_cfg_file=./config/clean_nmt_all_rbmt_bt_${randseg_direction}_cfg.sh
             export randseg_raw_data_folder=./data/fin-sme/clean_nmt_all_rbmt_bt
             ;;
+        own)
+            export randseg_cfg_file=./config/own_bt_${randseg_direction}_cfg.sh
+            export randseg_raw_data_folder=./data/fin-sme/own_bt
+            ;;
         *)
             exit
     esac
