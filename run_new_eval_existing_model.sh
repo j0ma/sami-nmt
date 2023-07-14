@@ -11,7 +11,6 @@ source scripts/sentencepiece_functions.sh
 
 # Constants
 config_file=$1
-should_confirm=${2:-"true"}
 cuda_visible=${CUDA_VISIBLE_DEVICES:-""}
 
 check_these_vars=(
@@ -21,6 +20,7 @@ check_these_vars=(
 	"randseg_should_preprocess"
 	"randseg_should_evaluate"
     "randseg_use_sentencepiece"
+    "randseg_max_tokens"
     "randseg_new_eval_name"
     "randseg_new_eval_raw_data_folder"
     "randseg_new_eval_binarized_data_folder"
@@ -140,12 +140,13 @@ preprocess() {
         joined_dictionary_flag=""
     fi
     echo "joined_dictionary_flag=${joined_dictionary_flag}"
-    
+  
+    new_binarized_data_folder="${new_eval_folder}/binarized_data"
     fairseq-preprocess \
         --source-lang "${src}" --target-lang "${tgt}" \
         --srcdict ${train_folder}/binarized_data/dict.${src}.txt \
         --testpref "${new_eval_folder}/test.${subword_suffix}" \
-        --destdir "${new_eval_folder}/binarized_data" \
+        --destdir ${new_binarized_data_folder} \
         --workers "${randseg_num_parallel_workers}" \
         ${joined_dictionary_flag}
 
@@ -160,11 +161,11 @@ reverse_subword_segmentation () {
 
     if [ "$randseg_use_sentencepiece" = "yes" ]
     then
-        reverse_bpe_segmentation \
+        reverse_sentencepiece_segmentation \
             "${input_file}" \
             "${output_file}"
     else
-        reverse_sentencepiece_segmentation \
+        reverse_bpe_segmentation \
             "${input_file}" \
             "${output_file}"
     fi
@@ -184,16 +185,19 @@ evaluate() {
     local experiment_name=$(basename $(realpath ${train_folder}/../../))
     local new_eval_folder="${experiment_folder}/${experiment_name}/eval/${new_eval_name}"
 
+    # Notes
+    # - binarized_data_folder: contains .bin, .idx files as well as dict .txt files
+    #   - should have been created by call to preprocess
+    # - data_folder: contains the raw text data
     local data_folder="${new_eval_folder}/raw_data"
     local binarized_data_folder="${new_eval_folder}/binarized_data"
+    #local data_folder="${randseg_new_eval_raw_data_folder:-$_raw_data_folder}"
+    #local binarized_data_folder="${randseg_new_eval_binarized_data_folder:-$_binarized_data_folder}"
+ 
     local src=${randseg_source_language}
     local tgt=${randseg_target_language}
 
     echo "❗ [${split}] Evaluating..."
-
-    if [[ -z $randseg_beam_size ]]; then
-        readonly randseg_beam_size=5
-    fi
 
     local checkpoint_file="${new_eval_folder}/checkpoint"
     local out="${new_eval_folder}/${split}.out"
@@ -213,6 +217,7 @@ evaluate() {
         --seed="${randseg_random_seed}" \
         --gen-subset="${split}" \
         --beam="${randseg_beam_size}" \
+        --max-tokens=${randseg_max_tokens} \
         --no-progress-bar | tee "${out}"
 
     # Also separate gold/system output/source into separate text files
@@ -250,51 +255,34 @@ evaluate() {
 
 }
 
-construct_command () {
-    local flag=$1
-    local command_name=$2
-    test "${flag}" = "yes" && echo "${command_name}" || echo "skip"
-}
-
 main() {
     local config=$1
-    local should_confirm_commands=${2:-"true"}
 
     activate_conda_env
-
-    confirm_commands_flag=$(
-        test "${should_confirm_commands}" = "false" &&
-            echo "cat" ||
-            echo "fzf --sync --multi"
-    )
 
     # These should always happen
     check_deps
     check_env
 
-    preprocess_flag=$(construct_command $randseg_should_preprocess preprocess)
-    evaluate_flag=$(construct_command $randseg_should_evaluate evaluate)
-
     # always create eval
     create_eval_folder
 
     # preprocess if necessary
-    if [ "$preprocess_flag" = "skip" ]; then
-        echo not preprocessing
-    else
+    if [[ "$randseg_should_preprocess" = "yes" ]]; then
         preprocess
+    else
+        echo not preprocessing
     fi
 
-    if [ "$evaluate_flag" = "skip" ]; then
-        echo not evaluating
-    else
-        # evaluate always
-        evaluate "test"
+    if [[ "$randseg_should_evaluate" = "yes" ]]; then
+        evaluate "test" # split always test
 
         experiment_folder=$(realpath ${randseg_existing_train_folder}/../../)
         bash scripts/rescore_experiment.sh ${experiment_folder}
+    else
+        echo not evaluating
     fi
 
 }
 
-main "${config_file}" "${should_confirm}"
+main "${config_file}" 
