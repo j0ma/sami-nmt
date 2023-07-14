@@ -19,6 +19,7 @@ check_these_vars=(
     "randseg_source_language"
     "randseg_target_language"
 	"randseg_should_preprocess"
+	"randseg_should_evaluate"
     "randseg_use_sentencepiece"
     "randseg_new_eval_name"
     "randseg_new_eval_raw_data_folder"
@@ -279,16 +280,21 @@ main() {
 
     # preprocess if necessary
     if [ "$preprocess_flag" = "skip" ]; then
-        continue
+        echo not preprocessing
     else
         preprocess
     fi
 
-    # evaluate always
-    evaluate "test"
+    if [ "$evaluate_flag" = "skip" ]; then
+        echo not evaluating
+    else
+        # evaluate always
+        evaluate "test"
 
-    experiment_folder=$(realpath ${randseg_existing_train_folder}/../../)
-    bash scripts/rescore_experiment.sh ${experiment_folder}
+        experiment_folder=$(realpath ${randseg_existing_train_folder}/../../)
+        bash scripts/rescore_experiment.sh ${experiment_folder}
+    fi
+
 }
 
 main "${config_file}" "${should_confirm}"
