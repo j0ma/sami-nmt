@@ -1,0 +1,9 @@
+8000	baseline	fin2sme
+8000	bt_nmt_all	fin2sme
+8000	bt_rbmt_all	fin2sme
+8000	bt_nmt_clean	fin2sme
+8000	bt_rbmt_clean	fin2sme
+8000	bt_nmt_all_rbmt_all	fin2sme
+8000	bt_nmt_clean_rbmt_clean	fin2sme
+8000	bt_nmt_clean_rbmt_all	fin2sme
+8000	own	fin2sme
