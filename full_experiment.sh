@@ -111,11 +111,11 @@ reverse_subword_segmentation () {
 
     if [ "$randseg_use_sentencepiece" = "yes" ]
     then
-        reverse_bpe_segmentation \
+        reverse_sentencepiece_segmentation \
             "${input_file}" \
             "${output_file}"
     else
-        reverse_sentencepiece_segmentation \
+        reverse_bpe_segmentation \
             "${input_file}" \
             "${output_file}"
     fi
