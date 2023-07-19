@@ -16,4 +16,5 @@ export randseg_max_tokens="17000"
 export randseg_max_update="15000"
 
 export randseg_warmup_init_lr="0.0003"
-export randseg_lr="0.0005"
+export randseg_lr="0.001"
+export randseg_clip_norm="1"
