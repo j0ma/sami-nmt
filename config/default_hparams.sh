@@ -2,7 +2,7 @@
 export randseg_activation_fn="relu"
 export randseg_max_tokens="12000"
 export randseg_beam_size=6
-export randseg_clip_norm="5"
+export randseg_clip_norm="1"
 export randseg_criterion="label_smoothed_cross_entropy"
 export randseg_decoder_attention_heads="8"
 export randseg_decoder_embedding_dim="512"
@@ -16,7 +16,7 @@ export randseg_eval_mode="dev"
 export randseg_eval_name="transformer"
 export randseg_label_smoothing="0.1"
 export randseg_langs_file=""
-export randseg_lr="0.001"
+export randseg_lr="0.0005"
 export randseg_lr_scheduler="inverse_sqrt"
 export randseg_max_update="20000"
 export randseg_num_parallel_workers=16
