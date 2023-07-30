@@ -15,7 +15,8 @@ def main(slug):
         "stderr"
     ) as stderr:
         for line in tqdm(sami_wikipedia, file=stderr):
-            click.echo(line, file=stdout)
+            if len(line):
+                click.echo(line, file=stdout)
 
 
 if __name__ == "__main__":

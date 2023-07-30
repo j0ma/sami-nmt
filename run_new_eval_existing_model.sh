@@ -18,6 +18,7 @@ check_these_vars=(
     "randseg_target_language"
 	"randseg_should_preprocess"
 	"randseg_should_evaluate"
+	"randseg_should_score"
     "randseg_use_sentencepiece"
     "randseg_max_tokens"
     "randseg_new_eval_name"
@@ -171,7 +172,7 @@ reverse_subword_segmentation () {
 
 }
 
-evaluate() {
+generate_and_score() {
 
     # Fairseq insists on calling the dev-set "valid"; hack around this.
     local split="${1/dev/valid}"
@@ -240,15 +241,17 @@ evaluate() {
 
     paste "${gold}" "${hyps}" "${source}" >"${source_tsv}"
 
-    # Compute some evaluation metrics
-    python scripts/evaluate.py \
-        --references-path "${gold}" \
-        --hypotheses-path "${hyps}" \
-        --source-path "${source}" \
-        --score-output-path "${score}" \
-        --output-as-tsv
+    if [[ "$randseg_should_score" = "yes" ]]; then
+        # Compute some evaluation metrics
+        python scripts/evaluate.py \
+            --references-path "${gold}" \
+            --hypotheses-path "${hyps}" \
+            --source-path "${source}" \
+            --score-output-path "${score}" \
+            --output-as-tsv
 
-    cat "${score}"
+        cat "${score}"
+    fi
 
     echo "✅ Done!"
 
@@ -274,10 +277,13 @@ main() {
     fi
 
     if [[ "$randseg_should_evaluate" = "yes" ]]; then
-        evaluate "test" # split always test
+        generate_and_score "test" # split always test
 
-        experiment_folder=$(realpath ${randseg_existing_train_folder}/../../)
-        bash scripts/rescore_experiment.sh ${experiment_folder}
+
+        if [[ "$randseg_should_score" = "yes" ]]; then
+            experiment_folder=$(realpath ${randseg_existing_train_folder}/../../)
+            bash scripts/rescore_experiment.sh ${experiment_folder}
+        fi
     else
         echo not evaluating
     fi

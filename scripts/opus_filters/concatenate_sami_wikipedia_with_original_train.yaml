@@ -1,9 +1,0 @@
-common:
-    output_directory: .
-
-steps:
-
-  - type: concatenate
-    parameters:
-        inputs: [../train.sme, ../wikipedia/train.sme]
-        output: train.sme

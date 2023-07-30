@@ -11,3 +11,4 @@ export randseg_new_eval_binarized_data_folder=./fin_sme_bin/bt_fin2sme_${randseg
 mkdir -p $randseg_new_eval_binarized_data_folder
 
 export randseg_max_tokens=100000
+export randseg_should_score=no

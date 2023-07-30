@@ -7,15 +7,15 @@ steps:
   - type: remove_duplicates
     parameters:
         inputs:
-            - train_unfiltered.sme
+            - test_unfiltered.sme
         outputs:
-            - train_deduped.sme
+            - test_deduped.sme
 
   # Apply filters incl lang-id to deduped sami monolingual data
   - type: filter
     parameters:
-        inputs: [train_deduped.sme]
-        outputs: [train.sme]
+        inputs: [test_deduped.sme]
+        outputs: [test.sme]
         filters:
             - LengthFilter:
                 unit: word

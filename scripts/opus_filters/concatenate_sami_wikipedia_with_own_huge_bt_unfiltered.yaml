@@ -5,5 +5,5 @@ steps:
 
   - type: concatenate
     parameters:
-        inputs: [../own_bt_huge/train.sme, ../wikipedia/train_unfiltered.sme]
-        output: train.sme
+        inputs: [../mono_to_bt/test.sme ../wikipedia/test_unfiltered.sme]
+        output: test.sme
