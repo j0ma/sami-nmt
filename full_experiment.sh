@@ -6,8 +6,7 @@ set -eo pipefail
 echo "Execution environment:"
 env
 
-source scripts/bpe_functions.sh
-source scripts/sentencepiece_functions.sh
+source scripts/subword_functions.sh
 
 # Constants
 config_file=$1
