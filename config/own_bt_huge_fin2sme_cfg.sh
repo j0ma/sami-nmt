@@ -6,8 +6,8 @@ export randseg_root_folder=./experiments
 export randseg_raw_data_folder=./data/fin-sme/own_bt_huge
 export randseg_source_language=fin
 export randseg_target_language=sme
-export randseg_checkpoints_folder=./fin_sme_bin/own_bt_checkpoints_$(date +%s)
-export randseg_binarized_data_folder=./fin_sme_bin/own_bt_bindata_$(date +%s)
+export randseg_checkpoints_folder=./fin_sme_bin/own_bt_huge_checkpoints_$(date +%s)
+export randseg_binarized_data_folder=./fin_sme_bin/own_bt_huge_bindata_$(date +%s)
 export randseg_model_name=own_bt_huge
 
 mkdir -p $randseg_checkpoints_folder $randseg_binarized_data_folder
