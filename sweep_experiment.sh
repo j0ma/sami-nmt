@@ -88,6 +88,14 @@ run_single_exp () {
             export randseg_cfg_file=./config/own_bt_${randseg_direction}_cfg.sh
             export randseg_raw_data_folder=./data/fin-sme/own_bt_onceonly
             ;;
+        own_beam1)
+            export randseg_cfg_file=./config/own_bt_beam1_${randseg_direction}_cfg.sh
+            export randseg_raw_data_folder=./data/fin-sme/own_bt_beam1
+            ;;
+        own_beam1_huge)
+            export randseg_cfg_file=./config/own_bt_beam1_huge_${randseg_direction}_cfg.sh
+            export randseg_raw_data_folder=./data/fin-sme/own_bt_beam1_plus_huge
+            ;;
         *)
             exit
     esac
