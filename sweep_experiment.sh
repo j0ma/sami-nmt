@@ -117,4 +117,4 @@ hparams_file=${randseg_hparams_folder}/worker${taskid}.tsv
 
 echo "Number of GPUs: $num_gpus"
 
-parallel --jobs $num_gpus --link "run_single_exp {1} {2}" ::: ${gpus} :::: $hparams_file
+parallel --delay '5s' --jobs $num_gpus --link "run_single_exp {1} {2}" ::: ${gpus} :::: $hparams_file
