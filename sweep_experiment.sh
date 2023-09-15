@@ -33,8 +33,14 @@ run_single_exp () {
 
     case $randseg_train_data_type in
         baseline)
-            export randseg_raw_data_folder=./data/fin-sme
-            export randseg_cfg_file=./config/${randseg_direction}_cfg.sh
+            if [ "${randseg_direction}" = "bidirectional" ]
+            then
+                export randseg_raw_data_folder=./data/fin-sme/bidirectional_baseline/
+                export randseg_cfg_file=./config/bidirectional_baseline_cfg.sh
+            else
+                export randseg_raw_data_folder=./data/fin-sme/
+                export randseg_cfg_file=${randseg_direction}_cfg.sh
+            fi
             ;;
         bt_nmt_all)
             export randseg_raw_data_folder=./data/fin-sme/nmt_bt
@@ -64,9 +70,19 @@ run_single_exp () {
             export randseg_cfg_file=./config/clean_nmt_all_rbmt_bt_${randseg_direction}_cfg.sh
             export randseg_raw_data_folder=./data/fin-sme/clean_nmt_all_rbmt_bt
             ;;
+        own_huge2)
+            export randseg_cfg_file=./config/own_bt_huge2_${randseg_direction}_cfg.sh
+            export randseg_raw_data_folder=./data/fin-sme/own_bt_huge2_fin2sme
+            ;;
         own_huge)
-            export randseg_cfg_file=./config/own_bt_huge_${randseg_direction}_cfg.sh
-            export randseg_raw_data_folder=./data/fin-sme/own_bt_huge
+            if [ "${randseg_direction}" = "bidirectional" ]
+            then
+                export randseg_raw_data_folder=./data/fin-sme/bidirectional_own_bt_huge
+                export randseg_cfg_file=./config/bidirectional_own_bt_huge_cfg.sh
+            else
+                export randseg_raw_data_folder=./data/fin-sme/own_bt_huge
+                export randseg_cfg_file=./config/own_bt_huge_${randseg_direction}_cfg.sh
+            fi
             ;;
         own)
             export randseg_cfg_file=./config/own_bt_${randseg_direction}_cfg.sh
