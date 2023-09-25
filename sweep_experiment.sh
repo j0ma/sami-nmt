@@ -80,14 +80,24 @@ run_single_exp () {
             then
                 export randseg_raw_data_folder=./data/fin-sme/bidirectional_own_bt_huge
                 export randseg_cfg_file=./config/bidirectional_own_bt_huge_cfg.sh
+            elif [ "${randseg_joint_subwords}" = "yes" ]
+            then
+                export randseg_raw_data_folder=./data/fin-sme/own_bt_huge
+                export randseg_cfg_file=./config/joint_own_bt_huge_${randseg_direction}_cfg.sh
             else
                 export randseg_raw_data_folder=./data/fin-sme/own_bt_huge
                 export randseg_cfg_file=./config/own_bt_huge_${randseg_direction}_cfg.sh
             fi
             ;;
         own)
-            export randseg_cfg_file=./config/own_bt_${randseg_direction}_cfg.sh
-            export randseg_raw_data_folder=./data/fin-sme/own_bt_onceonly
+            if [ "${randseg_joint_subwords}" = "yes" ]
+            then
+                export randseg_raw_data_folder=./data/fin-sme/own_bt_onceonly
+                export randseg_cfg_file=./config/joint_own_bt_${randseg_direction}_cfg.sh
+            else
+                export randseg_cfg_file=./config/own_bt_${randseg_direction}_cfg.sh
+                export randseg_raw_data_folder=./data/fin-sme/own_bt_onceonly
+            fi
             ;;
         own_beam1)
             export randseg_cfg_file=./config/own_bt_beam1_${randseg_direction}_cfg.sh
