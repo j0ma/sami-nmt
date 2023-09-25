@@ -26,3 +26,4 @@ export randseg_should_preprocess=yes
 export randseg_should_train=yes
 export randseg_should_evaluate=yes
 export randseg_use_sentencepiece=no
+export character_level_model=yes

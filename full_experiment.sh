@@ -31,6 +31,7 @@ check_these_vars=(
 	"randseg_should_train"
 	"randseg_should_evaluate"
     "randseg_use_sentencepiece"
+    "character_level_model"
 )
 
 activate_conda_env () {
@@ -107,7 +108,12 @@ reverse_subword_segmentation () {
     local input_file=$1
     local output_file=$2
 
-    if [ "$randseg_use_sentencepiece" = "yes" ]
+    if [ "${character_level_model}" = "yes" ]
+    then
+        reverse_character_segmentation \
+            "${input_file}" \
+            "${output_file}"
+    elif [ "$randseg_use_sentencepiece" = "yes" ]
     then
         reverse_sentencepiece_segmentation \
             "${input_file}" \
@@ -135,7 +141,24 @@ preprocess() {
 
     # Train BPE/RandBPE using the train seg
 
-    if [ "$randseg_use_sentencepiece" = "yes" ]
+    if [ "${character_level_model}" = "yes" ]
+    then
+        subword_suffix="char"
+        for language in "${src}" "${tgt}"
+        do
+            for split in "train" "dev" "test"; do
+                echo "[${language}, ${split}] Segmenting into characters..."
+                text_file="${data_folder}/${split}.${language}"
+                out_file=${supplemental_data_folder}/${split}.char.${language}
+                apply_character_segmentation \
+                    "${text_file}" \
+                    "${out_file}"
+
+                n_lines_in_out=$(wc -l ${out_file} | cut -f1 -d' ')
+                echo "[${language}, ${split}] Number of lines in ${out_file}: ${n_lines_in_out}"
+            done
+        done
+    elif [ "$randseg_use_sentencepiece" = "yes" ]
     then
         subword_suffix="spm"
         if [ "$randseg_joint_subwords" = "yes" ]

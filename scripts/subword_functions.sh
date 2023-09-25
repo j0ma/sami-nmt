@@ -141,6 +141,29 @@ reverse_sentencepiece_segmentation() {
     | sacremoses detokenize >"${out_file}"
 }
 
+apply_character_segmentation () {
+    local text_file=$1
+    local out_file=$2
+
+    sed -r \
+        -e 's/ /▁/g' \
+        -e 's/./& /g' \
+        <"${text_file}" \
+        > "${out_file}"
+
+}
+
+reverse_character_segmentation () {
+    local text_file=$1
+    local out_file=$2
+
+    sed -r \
+        -e 's/ //g' \
+        -e 's/▁/ /g' \
+        <"${text_file}" \
+    | sacremoses detokenize >"${out_file}"
+}
+
 # Export functions
 export -f learn_bpe
 export -f apply_bpe
