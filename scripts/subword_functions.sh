@@ -79,6 +79,7 @@ train_sentencepiece_model() {
   fi
 
   # Train SentencePiece model
+  echo "spm_train binary: $(which spm_train)"
   spm_train \
 	 --input=$input_file \
 	 --model_prefix=$model_prefix \
@@ -92,6 +93,9 @@ apply_sentencepiece_model() {
   input_file=$2
   output_file=$3
 
+  echo "[apply_sentencepiece_model] Input file: ${input_file}"
+  echo "[apply_sentencepiece_model] Output file: ${output_file}"
+
   # Check if all arguments are provided
   if [ -z "$model_file" ] || [ -z "$input_file" ]; then
     echo "Usage: apply_sentencepiece_model <model_file> <input_file>"
@@ -99,11 +103,12 @@ apply_sentencepiece_model() {
   fi
 
   # Apply SentencePiece model
+  echo "spm_encode binary: $(which spm_encode)"
   spm_encode \
 	 --model=$model_file \
 	 --output_format=piece \
-     < $input_file \
-     > $output_file
+     --input $input_file \
+     --output $output_file
 }
 
 # Function to get SentencePiece subword vocabulary

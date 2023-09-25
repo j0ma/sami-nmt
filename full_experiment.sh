@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Complete experiment sequence
-set -eo pipefail
+set -xeo pipefail
 
 echo "Execution environment:"
 env
@@ -159,6 +159,9 @@ preprocess() {
                     "${spm_model_file}" \
                     "${text_file}" \
                     "${out_file}"
+
+                n_lines_in_out=$(wc -l ${out_file} | cut -f1 -d' ')
+                echo "[${language}, ${split}] Number of lines in spm output file: ${n_lines_in_out}"
             done
         else
             subword_suffix="bpe"
