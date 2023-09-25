@@ -391,6 +391,8 @@ train() {
         --validate-interval-updates="${randseg_validate_interval_updates}" \
         --adam-betas '(0.9, 0.98)' --update-freq="${randseg_update_freq}" \
         --no-epoch-checkpoints \
+        --max-source-positions 1400 \
+        --max-target-positions 1400 \
         --eval-bleu \
         --eval-bleu-remove-bpe \
         --eval-bleu-detok "moses" \
@@ -445,6 +447,9 @@ evaluate() {
         --seed="${randseg_random_seed}" \
         --gen-subset="${split}" \
         --beam="${randseg_beam_size}" \
+        --task translation \
+        --max-source-positions 1400 \
+        --max-target-positions 1400 \
         --no-progress-bar | tee "${OUT}"
 
         #--max-source-positions=2500 --max-target-positions=2500 \
