@@ -84,6 +84,10 @@ run_single_exp () {
             then
                 export randseg_raw_data_folder=./data/fin-sme/own_bt_huge
                 export randseg_cfg_file=./config/joint_own_bt_huge_${randseg_direction}_cfg.sh
+            elif [ "${character_level_model}" = "yes" ]
+            then
+                export randseg_raw_data_folder=./data/fin-sme/own_bt_huge
+                export randseg_cfg_file=./config/char_own_bt_huge_${randseg_direction}_cfg.sh
             else
                 export randseg_raw_data_folder=./data/fin-sme/own_bt_huge
                 export randseg_cfg_file=./config/own_bt_huge_${randseg_direction}_cfg.sh
@@ -94,6 +98,10 @@ run_single_exp () {
             then
                 export randseg_raw_data_folder=./data/fin-sme/own_bt_onceonly
                 export randseg_cfg_file=./config/joint_own_bt_${randseg_direction}_cfg.sh
+            elif [ "${character_level_model}" = "yes" ]
+            then
+                export randseg_raw_data_folder=./data/fin-sme/own_bt_onceonly
+                export randseg_cfg_file=./config/char_own_bt_${randseg_direction}_cfg.sh
             else
                 export randseg_cfg_file=./config/own_bt_${randseg_direction}_cfg.sh
                 export randseg_raw_data_folder=./data/fin-sme/own_bt_onceonly
