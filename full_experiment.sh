@@ -11,7 +11,6 @@ source scripts/subword_functions.sh
 # Constants
 config_file=$1
 should_confirm=${2:-"true"}
-append_meta=${3:-"false"}
 
 cuda_visible=${CUDA_VISIBLE_DEVICES:-""}
 
