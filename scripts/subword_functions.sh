@@ -45,6 +45,10 @@ apply_bpe() {
     local codes_file=$2
     local out_file=$3
 
+  echo "[apply_bpe] BPE codes file: ${codes_file}"
+  echo "[apply_bpe] Input file: ${text_file}"
+  echo "[apply_bpe] Output file: ${out_file}"
+
     subword-nmt apply-bpe \
         -c "${codes_file}" \
         <"${text_file}" \
@@ -93,6 +97,7 @@ apply_sentencepiece_model() {
   input_file=$2
   output_file=$3
 
+  echo "[apply_sentencepiece_model] Model file: ${model_file}"
   echo "[apply_sentencepiece_model] Input file: ${input_file}"
   echo "[apply_sentencepiece_model] Output file: ${output_file}"
 
