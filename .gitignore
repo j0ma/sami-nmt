@@ -16,3 +16,4 @@ eng_fin_bin
 launch_5k_exps.sh
 relaunch_2k_exps.sh
 rerun_these_deleteme.txt
+log/
