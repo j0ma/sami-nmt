@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Complete experiment sequence
-set -eo pipefail
+set -xeo pipefail
 
 echo "Execution environment:"
 env
