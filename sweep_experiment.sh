@@ -16,7 +16,6 @@
 env
 locale
 
-test -z "${randseg_cfg_file}" && exit 1
 test -z "${randseg_hparams_folder}" && exit 1
 
 run_single_exp () {
