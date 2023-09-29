@@ -15,3 +15,4 @@ mkdir -p $randseg_checkpoints_folder $randseg_binarized_data_folder
 export randseg_max_tokens="17000" 
 export randseg_max_update="15000"
 export randseg_joint_subwords=yes
+export randseg_lr=0.001
