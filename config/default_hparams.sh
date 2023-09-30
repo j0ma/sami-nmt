@@ -38,3 +38,5 @@ export randseg_use_sentencepiece="yes"
 export randseg_should_score="yes"
 export randseg_joint_subwords="yes"
 export character_level_model="no"
+export randseg_random_seed=1234
+export randseg_temperature=1.0
