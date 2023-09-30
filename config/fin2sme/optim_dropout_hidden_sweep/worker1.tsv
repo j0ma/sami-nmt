@@ -1,0 +1,9 @@
+randseg_encoder_hidden_size	randseg_decoder_hidden_size	randseg_num_attention_heads	randseg_num_merges	randseg_p_dropout	randseg_direction	randseg_train_data_type
+512	512	2	8000	0.1	fin2sme	own_huge
+512	512	2	8000	0.5	fin2sme	own_huge
+512	512	6	8000	0.1	fin2sme	own_huge
+512	512	6	8000	0.5	fin2sme	own_huge
+1024	1024	2	8000	0.1	fin2sme	own_huge
+1024	1024	2	8000	0.5	fin2sme	own_huge
+1024	1024	6	8000	0.1	fin2sme	own_huge
+1024	1024	6	8000	0.5	fin2sme	own_huge

@@ -1,0 +1,4 @@
+{"randseg_num_merges":"8000","randseg_train_data_type":"baseline","randseg_direction":"bidirectional"}
+{"randseg_num_merges":"8000","randseg_train_data_type":"own_huge","randseg_direction":"bidirectional"}
+{"randseg_num_merges":"1000","randseg_train_data_type":"baseline","randseg_direction":"bidirectional"}
+{"randseg_num_merges":"1000","randseg_train_data_type":"own_huge","randseg_direction":"bidirectional"}

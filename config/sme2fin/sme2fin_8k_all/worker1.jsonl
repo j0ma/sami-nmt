@@ -1,0 +1,8 @@
+{"randseg_num_merges":"8000","randseg_train_data_type":"baseline","randseg_direction":"sme2fin"}
+{"randseg_num_merges":"8000","randseg_train_data_type":"bt_nmt_all","randseg_direction":"sme2fin"}
+{"randseg_num_merges":"8000","randseg_train_data_type":"bt_rbmt_all","randseg_direction":"sme2fin"}
+{"randseg_num_merges":"8000","randseg_train_data_type":"bt_nmt_clean","randseg_direction":"sme2fin"}
+{"randseg_num_merges":"8000","randseg_train_data_type":"bt_rbmt_clean","randseg_direction":"sme2fin"}
+{"randseg_num_merges":"8000","randseg_train_data_type":"bt_nmt_all_rbmt_all","randseg_direction":"sme2fin"}
+{"randseg_num_merges":"8000","randseg_train_data_type":"bt_nmt_clean_rbmt_clean","randseg_direction":"sme2fin"}
+{"randseg_num_merges":"8000","randseg_train_data_type":"bt_nmt_clean_rbmt_all","randseg_direction":"sme2fin"}

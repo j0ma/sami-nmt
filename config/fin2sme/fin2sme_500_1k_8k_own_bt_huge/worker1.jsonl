@@ -1,0 +1,3 @@
+{"randseg_num_merges":"8000","randseg_train_data_type":"own_huge","randseg_direction":"fin2sme"}
+{"randseg_num_merges":"1000","randseg_train_data_type":"own_huge","randseg_direction":"fin2sme"}
+{"randseg_num_merges":"500","randseg_train_data_type":"own_huge","randseg_direction":"fin2sme"}

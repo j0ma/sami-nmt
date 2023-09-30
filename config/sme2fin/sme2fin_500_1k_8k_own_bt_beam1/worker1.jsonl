@@ -1,0 +1,6 @@
+{"randseg_num_merges":"500","randseg_train_data_type":"own_beam1","randseg_direction":"sme2fin"}
+{"randseg_num_merges":"500","randseg_train_data_type":"own_beam1_huge","randseg_direction":"sme2fin"}
+{"randseg_num_merges":"1000","randseg_train_data_type":"own_beam1","randseg_direction":"sme2fin"}
+{"randseg_num_merges":"1000","randseg_train_data_type":"own_beam1_huge","randseg_direction":"sme2fin"}
+{"randseg_num_merges":"8000","randseg_train_data_type":"own_beam1","randseg_direction":"sme2fin"}
+{"randseg_num_merges":"8000","randseg_train_data_type":"own_beam1_huge","randseg_direction":"sme2fin"}
