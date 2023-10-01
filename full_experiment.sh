@@ -324,6 +324,13 @@ train() {
     train_log_file="${train_folder}/train.log"
     cpu_gpu_fp16_flag=$(test -z "${cuda_visible}" && echo "--cpu" || echo "--fp16")
 
+    if [ "${randseg_use_sentencepiece}" = "yes" ]
+    then
+        remove_bpe_flag="sentencepiece"
+    else
+        remove_bpe_flag="subword_nmt"
+    fi
+
     src=${randseg_source_language}
     tgt=${randseg_target_language}
 
@@ -353,6 +360,8 @@ train() {
     else
         decoder_normalize_before_flag=""
     fi
+
+
 
     fairseq-train \
         "${binarized_data_folder}" \
@@ -394,7 +403,7 @@ train() {
         --max-source-positions 1400 \
         --max-target-positions 1400 \
         --eval-bleu \
-        --eval-bleu-remove-bpe \
+        --eval-bleu-remove-bpe ${remove_bpe_flag} \
         --eval-bleu-detok "moses" \
         --skip-invalid-size-inputs-valid-test |
         tee "${train_log_file}"
@@ -417,6 +426,13 @@ evaluate() {
     supplemental_data_folder="${train_folder}/supplemental_data"
     train_log_file="${train_folder}/train.log"
     cpu_gpu_fp16_flag=$(test -z "${cuda_visible}" && echo "--cpu" || echo "--fp16")
+
+    if [ "${randseg_use_sentencepiece}" = "yes" ]
+    then
+        remove_bpe_flag="sentencepiece"
+    else
+        remove_bpe_flag="subword_nmt"
+    fi
 
     src=${randseg_source_language}
     tgt=${randseg_target_language}
@@ -450,6 +466,7 @@ evaluate() {
         --task translation \
         --max-source-positions 1400 \
         --max-target-positions 1400 \
+        --remove-bpe ${remove_bpe_flag} \
         --no-progress-bar | tee "${OUT}"
 
         #--max-source-positions=2500 --max-target-positions=2500 \
