@@ -2,7 +2,7 @@
 
 resolve_data_folder_and_cfg_file() {
 
-    case $randseg_train_data_type in
+    case "${randseg_train_data_type}" in
         baseline)
             if [ "${randseg_direction}" = "bidirectional" ]
             then
