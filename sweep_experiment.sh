@@ -36,10 +36,7 @@ run_single_exp () {
     local hparams=$1
     shift
 
-    echo "Environment variables and locale info:"
-    env
-    locale
-
+    export randseg_joint_subwords=yes
     sort_out_hyperparams "$hparams"
 
     CUDA_VISIBLE_DEVICES=${gpu_idx} ./full_experiment.sh "${randseg_cfg_file}" false
