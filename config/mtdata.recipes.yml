@@ -1,29 +1,31 @@
-# Finnish
-- id: randbpe-eng-fin-big
-  langs: eng-fin
-  desc: "English - Finnish, mimics WMT 2019 News Task"
+# Inuktitut
+- id: hansard-eng-iku
+  langs: eng-iku
+  desc: "English <-> Inuktitut, Hansard data"
   train:
-    - Statmt-europarl-9-fin-eng
-    - ParaCrawl-paracrawl-9-eng-fin
-    - Tilde-rapid-2016-eng-fin
+    - NRC_CA-nunavut_hansard_train-3-iku-eng
   dev:
-    # eval on eng-fin newsdev/test 2015-2017
-    - Statmt-newsdev_enfi-2015-eng-fin
-    - Statmt-newstest_enfi-2017-eng-fin
-    - Statmt-newstest_enfi-2016-eng-fin
+    - NRC_CA-nunavut_hansard_dev-3-iku-eng
   test:
-    - Statmt-newstest_enfi-2019-eng-fin
+    - NRC_CA-nunavut_hansard_test-3-iku-eng
 
-# Estonian
-- id: randbpe-eng-est-big
-  langs: eng-est
-  desc: "English - Estonian, mimics WMT 2018 News Task"
+- id: hansard-newstest-eng-iku
+  langs: eng-iku
+  desc: "English -> Inuktitut, Hansard train / WMT20 dev and test"
   train:
-    - ParaCrawl-paracrawl-9-eng-est
-    - Statmt-ccaligned-1-eng-est_EE
-    - Statmt-europarl-7-est-eng
-    - Tilde-rapid-2016-eng-est
+    - NRC_CA-nunavut_hansard_train-3-iku-eng
   dev:
-    - Statmt-newsdev_enet-2018-eng-est
+    - Statmt-newsdev_eniu-2020-eng-iku
   test:
-    - Statmt-newstest_enet-2018-eng-est
+    - Statmt-newstest_eniu-2020-eng-iku
+
+- id: hansard-newstest-iku-eng
+  langs: iku-eng
+  desc: "Inuktitut -> English, Hansard train / WMT20 dev and test"
+  train:
+    - NRC_CA-nunavut_hansard_train-3-iku-eng
+  dev:
+    - Statmt-newsdev_iuen-2020-iku-eng
+  test:
+    - Statmt-newstest_iuen-2020-iku-eng
+ 

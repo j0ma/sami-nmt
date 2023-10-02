@@ -21,17 +21,17 @@ mtdata_download () {
 
     # actually perform download
     mtdata get-recipe \
-        -ri "randbpe-${src_lang}-${tgt_lang}-${corpus_name}" \
+        -ri "${corpus_name}-${src_lang}-${tgt_lang}" \
         -o "${destination}"
     
     # go back
     popd
 }
 
-src_lang=$1
-tgt_lang=$2
-data_folder=$3
-corpus_name=${4:-big}
+src_lang=${src_lang}
+tgt_lang=${tgt_lang}
+data_folder=${data_folder:-./data}
+corpus_name=${corpus_name:-hansard}
 
 destination="${data_folder}/${src_lang}-${tgt_lang}/${corpus_name}/download"
 
