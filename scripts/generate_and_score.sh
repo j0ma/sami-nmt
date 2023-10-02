@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euxo pipefail
+set -euo pipefail
 
 source ~/sami-nmt/scripts/subword_functions.sh
 
@@ -9,11 +9,13 @@ src=${src_lang:-sme}
 tgt=${tgt_lang:-fin}
 beam_size=${beam_size:-1}
 should_compute_metrics=${should_compute_metrics:-"no"}
+supplemental_data_folder=${supplemental_data_folder:-"../supplemental_data"}
 binarized_data_folder=${binarized_data_folder:-"./binarized_data"}
 checkpoint=${checkpoint:-"./checkpoint"}
 max_tokens=${max_tokens:-17000}
 buffer_size=${buffer_size:-1000}
 split=${split:-"test"}
+input_file=${input_data:-${supplemental_data_folder}/${split}.spm.${src}}
 
 # derived quantities
 folder=beam${beam_size}
@@ -43,8 +45,7 @@ fairseq-interactive \
     --beam="${beam_size}" \
     --max-tokens ${max_tokens} \
     --buffer-size ${buffer_size} \
-    --no-progress-bar < ${split}.spm.${src} | tee "${out}"
-
+    < "${input_file}" > "${out}"
 
 cat "${out}" | grep '^H-' | sed "s/^H-//g" | sort -k1 -n | cut -f3 >"${hyps}"
 
