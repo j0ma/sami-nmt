@@ -13,7 +13,6 @@
 #SBATCH --mail-type=FAIL,CANCEL
 #SBATCH --output=%x-%j.out
 
-
 test -z "${randseg_hparams_folder}" && exit 1
 
 parse_json_hparams() {
@@ -26,8 +25,14 @@ parse_json_hparams() {
 sort_out_hyperparams() {
     local hparams_line=$1
     parse_json_hparams "${hparams_line}"
-    source ./scripts/resolve_data_folder_and_cfg_file.sh
-    resolve_data_folder_and_cfg_file
+    data_and_cfg_json=$(
+        python scripts/resolve_data_folder_and_cfg_file.py \
+            --direction "${randseg_direction}" \
+            --train-data-type "${randseg_train_data_type}"
+    )
+
+    export randseg_data_folder=$(echo ${data_and_cfg_json} | jq -r '.data_folder')
+    export randseg_cfg_file=$(echo ${data_and_cfg_json} | jq -r '.cfg_file')
 }
 
 run_single_exp () {
@@ -38,6 +43,8 @@ run_single_exp () {
 
     export randseg_joint_subwords=yes
     sort_out_hyperparams "$hparams"
+
+    env | rg '^randseg_'
 
     CUDA_VISIBLE_DEVICES=${gpu_idx} ./full_experiment.sh "${randseg_cfg_file}" false
 
@@ -57,4 +64,4 @@ hparams_file=${randseg_hparams_folder}/worker${taskid}.jsonl
 
 echo "Number of GPUs: $num_gpus"
 
-parallel --delay '5s' --jobs $num_gpus --link 'run_single_exp {1} {2}' ::: ${gpus} :::: ${hparams_file}
+parallel --jobs $num_gpus --link 'run_single_exp {1} {2}' ::: ${} :::: ${hparams_file}
