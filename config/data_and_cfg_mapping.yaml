@@ -1,4 +1,5 @@
 bidirectional:
+    # obsolete
     baseline:
          randseg_raw_data_folder: ./data/fin-sme/bidirectional_baseline/
          randseg_cfg_file: ./config/fin2sme/bidirectional_baseline_cfg.sh
@@ -36,17 +37,9 @@ fin2sme:
     own_huge:
          randseg_raw_data_folder: ./data/fin-sme/own_bt_huge
          randseg_cfg_file: ./config/fin2sme/joint_own_bt_huge_fin2sme_cfg.sh
-         randseg_raw_data_folder: ./data/fin-sme/own_bt_huge
-         randseg_cfg_file: ./config/fin2sme/char_own_bt_huge_fin2sme_cfg.sh
-         randseg_raw_data_folder: ./data/fin-sme/own_bt_huge
-         randseg_cfg_file: ./config/fin2sme/own_bt_huge_fin2sme_cfg.sh
     own:
          randseg_raw_data_folder: ./data/fin-sme/own_bt_onceonly
          randseg_cfg_file: ./config/fin2sme/joint_own_bt_fin2sme_cfg.sh
-         randseg_raw_data_folder: ./data/fin-sme/own_bt_onceonly
-         randseg_cfg_file: ./config/fin2sme/char_own_bt_fin2sme_cfg.sh
-         randseg_cfg_file: ./config/fin2sme/own_bt_fin2sme_cfg.sh
-         randseg_raw_data_folder: ./data/fin-sme/own_bt_onceonly
     own_beam1:
          randseg_cfg_file: ./config/fin2sme/own_bt_beam1_fin2sme_cfg.sh
          randseg_raw_data_folder: ./data/fin-sme/own_bt_beam1
@@ -84,20 +77,20 @@ sme2fin:
     own_huge:
          randseg_raw_data_folder: ./data/fin-sme/own_bt_huge
          randseg_cfg_file: ./config/sme2fin/joint_own_bt_huge_sme2fin_cfg.sh
-         randseg_raw_data_folder: ./data/fin-sme/own_bt_huge
-         randseg_cfg_file: ./config/sme2fin/char_own_bt_huge_sme2fin_cfg.sh
-         randseg_raw_data_folder: ./data/fin-sme/own_bt_huge
-         randseg_cfg_file: ./config/sme2fin/own_bt_huge_sme2fin_cfg.sh
     own:
          randseg_raw_data_folder: ./data/fin-sme/own_bt_onceonly
          randseg_cfg_file: ./config/sme2fin/joint_own_bt_sme2fin_cfg.sh
-         randseg_raw_data_folder: ./data/fin-sme/own_bt_onceonly
-         randseg_cfg_file: ./config/sme2fin/char_own_bt_sme2fin_cfg.sh
-         randseg_cfg_file: ./config/sme2fin/own_bt_sme2fin_cfg.sh
-         randseg_raw_data_folder: ./data/fin-sme/own_bt_onceonly
     own_beam1:
          randseg_cfg_file: ./config/sme2fin/own_bt_beam1_sme2fin_cfg.sh
          randseg_raw_data_folder: ./data/fin-sme/own_bt_beam1
     own_beam1_huge:
          randseg_cfg_file: ./config/sme2fin/own_bt_beam1_huge_sme2fin_cfg.sh
          randseg_raw_data_folder: ./data/fin-sme/own_bt_beam1_plus_huge
+eng2iku:
+    baseline:
+         randseg_cfg_file: ./config/eng2iku/joint_baseline_eng2iku_cfg.sh
+         randseg_raw_data_folder: ./data/eng-iku/hansard-newstest
+iku2eng:
+    baseline:
+         randseg_cfg_file: ./config/iku2eng/joint_baseline_iku2eng_cfg.sh
+         randseg_raw_data_folder: ./data/iku-eng/hansard-newstest
