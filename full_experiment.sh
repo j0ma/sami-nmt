@@ -466,9 +466,9 @@ evaluate() {
         --task translation \
         --max-source-positions 1400 \
         --max-target-positions 1400 \
-        --remove-bpe ${remove_bpe_flag} \
         --no-progress-bar | tee "${OUT}"
 
+        #--remove-bpe ${remove_bpe_flag} \
         #--max-source-positions=2500 --max-target-positions=2500 \
 
     # Also separate gold/system output/source into separate text files
