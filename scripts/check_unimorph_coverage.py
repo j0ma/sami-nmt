@@ -45,9 +45,16 @@ def get_inflected_words_from_text(file_obj, tokenize) -> set[str]:
 @click.option("--mode", type=click.Choice(["wordlist", "text"]), default="wordlist")
 @click.option("--use-moses-tokenizer", is_flag=True)
 @click.option("--moses-language", default="en")
+@click.option("--include-covered-msd", is_flag=True)
 @click.argument("input-file", type=click.File("r", encoding=ENCODING), default="-")
 def check_coverage(
-    language, unimorph_file, input_file, mode, use_moses_tokenizer, moses_language
+    language,
+    unimorph_file,
+    input_file,
+    mode,
+    use_moses_tokenizer,
+    moses_language,
+    include_covered_msd,
 ):
 
     unimorph_df = pd.read_csv(
@@ -77,7 +84,7 @@ def check_coverage(
 
     covered = unimorph_inflected_words.intersection(input_inflected_words)
     non_covered = input_inflected_words.difference(unimorph_inflected_words)
-    coverage_ratio = len(covered) / (len(covered) + len(non_covered))
+    coverage_ratio = round(len(covered) / (len(covered) + len(non_covered)), 3)
 
     result = {
         "words": {
@@ -90,6 +97,18 @@ def check_coverage(
             "coverage_ratio": coverage_ratio,
         },
     }
+
+    if include_covered_msd:
+        # create inflected word -> msd mapping for covered words
+        covered_msd = {
+            inflected_word: msd
+
+            for _, inflected_word, msd in unimorph_df.itertuples(index=False)
+
+            if inflected_word in covered
+        }
+        result["msd"] = covered_msd
+
     click.echo(json.dumps(result, indent=4, ensure_ascii=False))
 
 
