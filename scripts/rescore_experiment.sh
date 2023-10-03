@@ -8,12 +8,13 @@ score_individual_experiment () {
     local exp_name=$2
     local split=$3
     local metric=$4
+    local detok_suffix=${5:-".detok"}
     score_this_folder="${eval_folder}/${exp_name}"
 
     pushd $score_this_folder
     
     # get sacrebleu scores
-    sacrebleu ${split}.gold.detok -i ${split}.hyps.detok -b -m ${metric} -w 4 > ${split}.eval.score_sacrebleu_${metric}
+    sacrebleu ${split}.gold${detok_suffix} -i ${split}.hyps${detok_suffix} -b -m ${metric} -w 4 > ${split}.eval.score_sacrebleu_${metric}
 
 }
 
@@ -21,4 +22,12 @@ export -f score_individual_experiment
 
 experiment_folder=$(realpath $1)
 
-parallel --bar --progress "score_individual_experiment ${experiment_folder} {1} {2} {3}" ::: $(ls $experiment_folder/eval) ::: "test" "valid" ::: bleu chrf
+export use_detok=${use_detok:-yes}
+if [ "${use_detok}" = "yes" ]
+then
+    export detok_suffix=".detok"
+else
+    export detok_suffix=""
+fi
+
+parallel --bar --progress "score_individual_experiment ${experiment_folder} {1} {2} {3} ${detok_suffix}" ::: $(ls $experiment_folder/eval) ::: "test" "valid" ::: bleu chrf
