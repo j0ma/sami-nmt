@@ -64,4 +64,4 @@ hparams_file=${randseg_hparams_folder}/worker${taskid}.jsonl
 
 echo "Number of GPUs: $num_gpus"
 
-parallel --jobs $num_gpus --link 'run_single_exp {1} {2}' ::: ${} :::: ${hparams_file}
+parallel --delay 5 --jobs $num_gpus --link 'run_single_exp {1} {2}' ::: ${gpus} :::: ${hparams_file}
