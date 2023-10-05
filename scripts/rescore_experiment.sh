@@ -8,7 +8,15 @@ score_individual_experiment () {
     local exp_name=$2
     local split=$3
     local metric=$4
-    local detok_suffix=${5:-".detok"}
+    local use_detok=${5:-yes}
+
+    if [ "${use_detok}" = "yes" ]
+    then
+        export detok_suffix=".detok"
+    else
+        export detok_suffix=""
+    fi
+
     score_this_folder="${eval_folder}/${exp_name}"
 
     pushd $score_this_folder
@@ -23,11 +31,5 @@ export -f score_individual_experiment
 experiment_folder=$(realpath $1)
 
 export use_detok=${use_detok:-yes}
-if [ "${use_detok}" = "yes" ]
-then
-    export detok_suffix=".detok"
-else
-    export detok_suffix=""
-fi
 
-parallel --bar --progress "score_individual_experiment ${experiment_folder} {1} {2} {3} ${detok_suffix}" ::: $(ls $experiment_folder/eval) ::: "test" "valid" ::: bleu chrf
+parallel --bar --progress "score_individual_experiment ${experiment_folder} {1} {2} {3} ${use_detok}" ::: $(ls $experiment_folder/eval) ::: "test" "valid" ::: bleu chrf
