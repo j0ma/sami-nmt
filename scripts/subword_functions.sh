@@ -88,6 +88,7 @@ train_sentencepiece_model() {
 	 --input=$input_file \
 	 --model_prefix=$model_prefix \
 	 --vocab_size=$vocab_size \
+     --user_defined_symbols="<BT>" \
 	 --character_coverage 1
 }
 
