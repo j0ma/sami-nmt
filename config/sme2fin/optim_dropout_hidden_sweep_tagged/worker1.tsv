@@ -1,0 +1,9 @@
+randseg_encoder_hidden_size	randseg_decoder_hidden_size	randseg_encoder_attention_heads	randseg_decoder_attention_heads	randseg_num_merges	randseg_p_dropout	randseg_direction	randseg_train_data_type
+512	512	2	2	8000	0.1	sme2fin	own_tagged
+512	512	2	2	8000	0.5	sme2fin	own_tagged
+512	512	4	4	8000	0.1	sme2fin	own_tagged
+512	512	4	4	8000	0.5	sme2fin	own_tagged
+1024	1024	2	2	8000	0.1	sme2fin	own_tagged
+1024	1024	2	2	8000	0.5	sme2fin	own_tagged
+1024	1024	4	4	8000	0.1	sme2fin	own_tagged
+1024	1024	4	4	8000	0.5	sme2fin	own_tagged

@@ -31,7 +31,7 @@ sort_out_hyperparams() {
             --train-data-type "${randseg_train_data_type}"
     )
 
-    export randseg_data_folder=$(echo ${data_and_cfg_json} | jq -r '.data_folder')
+    export randseg_raw_data_folder=$(echo ${data_and_cfg_json} | jq -r '.data_folder')
     export randseg_cfg_file=$(echo ${data_and_cfg_json} | jq -r '.cfg_file')
 }
 

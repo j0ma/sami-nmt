@@ -34,6 +34,15 @@ fin2sme:
     own_huge2:
          randseg_cfg_file: ./config/fin2sme/own_bt_huge2_fin2sme_cfg.sh
          randseg_raw_data_folder: ./data/fin-sme/own_bt_huge2_fin2sme
+    own_huge_tagged:
+         randseg_raw_data_folder: ./data/fin-sme/own_bt_huge_tagged_fin2sme
+         randseg_cfg_file: ./config/fin2sme/joint_own_bt_huge_fin2sme_cfg.sh
+    own_best:
+         randseg_raw_data_folder: ./data/fin-sme/own_bt_best_oct23
+         randseg_cfg_file: ./config/fin2sme/joint_own_bt_best_fin2sme_cfg.sh
+    own_best_tagged:
+         randseg_raw_data_folder: ./data/fin-sme/own_bt_best_oct23_tagged/fin2sme/
+         randseg_cfg_file: ./config/fin2sme/joint_own_bt_best_fin2sme_cfg.sh
     own_huge:
          randseg_raw_data_folder: ./data/fin-sme/own_bt_huge
          randseg_cfg_file: ./config/fin2sme/joint_own_bt_huge_fin2sme_cfg.sh
@@ -77,9 +86,18 @@ sme2fin:
     own_huge:
          randseg_raw_data_folder: ./data/fin-sme/own_bt_huge
          randseg_cfg_file: ./config/sme2fin/joint_own_bt_huge_sme2fin_cfg.sh
+    own_best:
+         randseg_raw_data_folder: ./data/fin-sme/own_bt_best_oct23
+         randseg_cfg_file: ./config/sme2fin/joint_own_bt_best_sme2fin_cfg.sh
     own:
          randseg_raw_data_folder: ./data/fin-sme/own_bt_onceonly
          randseg_cfg_file: ./config/sme2fin/joint_own_bt_sme2fin_cfg.sh
+    own_tagged:
+         randseg_raw_data_folder: ./data/fin-sme/own_bt_onceonly_tagged_sme2fin
+         randseg_cfg_file: ./config/sme2fin/joint_own_bt_sme2fin_cfg.sh
+    own_best_tagged:
+         randseg_raw_data_folder: ./data/fin-sme/own_bt_best_oct23_tagged/sme2fin/
+         randseg_cfg_file: ./config/sme2fin/joint_own_bt_best_sme2fin_cfg.sh
     own_beam1:
          randseg_cfg_file: ./config/sme2fin/own_bt_beam1_sme2fin_cfg.sh
          randseg_raw_data_folder: ./data/fin-sme/own_bt_beam1
@@ -89,8 +107,8 @@ sme2fin:
 eng2iku:
     baseline:
          randseg_cfg_file: ./config/eng2iku/joint_baseline_eng2iku_cfg.sh
-         randseg_raw_data_folder: ./data/eng-iku/hansard-newstest
+         randseg_raw_data_folder: ./data/eng-iku/hansard
 iku2eng:
     baseline:
          randseg_cfg_file: ./config/iku2eng/joint_baseline_iku2eng_cfg.sh
-         randseg_raw_data_folder: ./data/iku-eng/hansard-newstest
+         randseg_raw_data_folder: ./data/iku-eng/hansard
