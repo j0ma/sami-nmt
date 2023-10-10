@@ -3,7 +3,7 @@
 export randseg_pick_randomly=no
 export randseg_uniform=no
 export randseg_root_folder=./experiments
-export randseg_raw_data_folder=./data/iku-eng/hansard-newstest/
+#export randseg_raw_data_folder=./data/iku-eng/hansard-newstest/
 export randseg_source_language=iku
 export randseg_target_language=eng
 export randseg_checkpoints_folder=./iku_eng_bin/iku_eng_${randseg_train_data_type}_checkpoints_$(date +%s)
