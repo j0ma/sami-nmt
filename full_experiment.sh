@@ -7,6 +7,10 @@ echo "Execution environment:"
 env
 
 source scripts/subword_functions.sh
+for fairseq_file in scripts/fairseq_functions/*.sh
+do
+    source "${fairseq_file}"
+done
 
 # Constants
 config_file=$1
