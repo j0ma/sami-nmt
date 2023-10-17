@@ -15,6 +15,13 @@ evaluate() {
     train_log_file="${train_folder}/train.log"
     cpu_gpu_fp16_flag=$(test -z "${cuda_visible}" && echo "--cpu" || echo "--fp16")
 
+    if [ "${randseg_use_sentencepiece}" = "yes" ]
+    then
+        remove_bpe_flag="sentencepiece"
+    else
+        remove_bpe_flag="subword_nmt"
+    fi
+
     src=${randseg_source_language}
     tgt=${randseg_target_language}
 
@@ -49,6 +56,7 @@ evaluate() {
         --max-target-positions 1400 \
         --no-progress-bar | tee "${OUT}"
 
+        #--remove-bpe ${remove_bpe_flag} \
         #--max-source-positions=2500 --max-target-positions=2500 \
 
     # Also separate gold/system output/source into separate text files

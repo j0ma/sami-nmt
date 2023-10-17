@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 train() {
-
     echo "❗ Starting training..."
 
     train_folder="${randseg_root_folder}/${randseg_experiment_name}/train/${randseg_model_name}"
@@ -12,6 +11,13 @@ train() {
     tensorboard_folder="${train_folder}/tensorboard"
     train_log_file="${train_folder}/train.log"
     cpu_gpu_fp16_flag=$(test -z "${cuda_visible}" && echo "--cpu" || echo "--fp16")
+
+    if [ "${randseg_use_sentencepiece}" = "yes" ]
+    then
+        remove_bpe_flag="sentencepiece"
+    else
+        remove_bpe_flag="subword_nmt"
+    fi
 
     src=${randseg_source_language}
     tgt=${randseg_target_language}
@@ -42,6 +48,8 @@ train() {
     else
         decoder_normalize_before_flag=""
     fi
+
+
 
     fairseq-train \
         "${binarized_data_folder}" \
@@ -79,16 +87,16 @@ train() {
         --save-interval="${randseg_save_interval}" \
         --validate-interval-updates="${randseg_validate_interval_updates}" \
         --adam-betas '(0.9, 0.98)' --update-freq="${randseg_update_freq}" \
+        --user-dir "./fairseq_extension/user" \
         --no-epoch-checkpoints \
         --max-source-positions 1400 \
         --max-target-positions 1400 \
         --eval-bleu \
-        --eval-bleu-remove-bpe \
+        --eval-bleu-remove-bpe ${remove_bpe_flag} \
         --eval-bleu-detok "moses" \
         --skip-invalid-size-inputs-valid-test |
         tee "${train_log_file}"
 
     echo "✅ Done training..."
     echo "✅ Done!"
-
 }
