@@ -91,9 +91,18 @@ reverse_subword_segmentation () {
 }
 
 construct_command () {
-    local flag=$1
-    local command_name=$2
-    test "${flag}" = "yes" && echo "${command_name}" || echo "skip"
+    local command_name=$1
+    local flag=$2
+    #test "${flag}" = "yes" && echo "${command_name}" || echo "skip"
+    if [ "${should_confirm}" = "yes" ] 
+    then
+        echo "${command_name}"
+    elif [ "${flag}" = "yes" ] 
+    then
+        echo "${command_name}"
+    else
+        echo "skip"
+    fi
 }
 
 main() {
@@ -112,10 +121,10 @@ main() {
     check_deps
     check_env
 
-    create_experiment_flag=$(construct_command $randseg_should_create_experiment create_experiment)
-    preprocess_flag=$(construct_command $randseg_should_preprocess preprocess)
-    train_flag=$(construct_command $randseg_should_train train)
-    evaluate_flag=$(construct_command $randseg_should_evaluate evaluate)
+    create_experiment_flag=$(construct_command create_experiment $randseg_should_create_experiment)
+    preprocess_flag=$(construct_command preprocess_for_translation $randseg_should_preprocess)
+    train_flag=$(construct_command train $randseg_should_train)
+    evaluate_flag=$(construct_command evaluate $randseg_should_evaluate)
 
     echo "$create_experiment_flag" "$preprocess_flag" "$train_flag" "$evaluate_flag" |
         tr " " "\n" |
@@ -126,6 +135,7 @@ main() {
             elif [ "$command" = "evaluate" ]; then
                 for split in "dev" "test"; do evaluate $split; done
             else
+                type $command
                 $command
             fi
         done
