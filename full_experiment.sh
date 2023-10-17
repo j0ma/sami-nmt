@@ -14,7 +14,7 @@ done
 
 # Constants
 config_file=$1
-should_confirm=${2:-"true"}
+should_confirm=${2:-"yes"}
 
 cuda_visible=${CUDA_VISIBLE_DEVICES:-""}
 
@@ -48,13 +48,13 @@ check_env() {
     source "${config}"
 
     # Then check mandatory variables
-    missing=false
+    missing=no
     for var in "${check_these_vars[@]}"; do
         eval "test -z \$$var" &&
             echo "Missing variable: $var" &&
-            missing="true"
+            missing="yes"
     done
-    test "$missing" = "true" && exit 1
+    test "$missing" = "yes" && exit 1
 
     echo "✅  Environment seems OK"
 }
@@ -77,12 +77,12 @@ construct_command () {
 
 main() {
     local config=$1
-    local should_confirm_commands=${2:-"true"}
+    local should_confirm_commands=${2:-"yes"}
 
     activate_conda_env
 
     confirm_commands_flag=$(
-        test "${should_confirm_commands}" = "false" &&
+        test "${should_confirm_commands}" = "no" &&
             echo "cat" ||
             echo "fzf --sync --multi"
     )
