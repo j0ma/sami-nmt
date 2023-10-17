@@ -49,3 +49,4 @@ set_env_var randseg_joint_subwords "no"
 set_env_var character_level_model "no"
 set_env_var randseg_random_seed 1234
 set_env_var randseg_temperature 1.0
+set_env_var randseg_eval_yle "yes"
