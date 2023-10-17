@@ -165,6 +165,28 @@ reverse_character_segmentation () {
     | sacremoses detokenize >"${out_file}"
 }
 
+reverse_subword_segmentation () {
+    local input_file=$1
+    local output_file=$2
+
+    if [ "${character_level_model}" = "yes" ]
+    then
+        reverse_character_segmentation \
+            "${input_file}" \
+            "${output_file}"
+    elif [ "${randseg_use_sentencepiece}" = "yes" ]
+    then
+        reverse_sentencepiece_segmentation \
+            "${input_file}" \
+            "${output_file}"
+    else
+        reverse_bpe_segmentation \
+            "${input_file}" \
+            "${output_file}"
+    fi
+
+}
+
 # Export functions
 export -f learn_bpe
 export -f apply_bpe
@@ -173,3 +195,4 @@ export -f reverse_bpe_segmentation
 export -f train_sentencepiece_model
 export -f apply_sentencepiece_model
 export -f get_sentencepiece_subword_vocabulary
+export -f reverse_subword_segmentation

@@ -1,5 +1,26 @@
 #!/usr/bin/env bash
 
+create_yle_eval_folder() {
+    echo "❗ Creating  eval folder"
+
+    local new_eval_name="eval_yle_${randseg_model_name}"
+    local raw_data_folder=${yle_raw_data_folder}
+    local train_folder=./experiments/${randseg_experiment_name}/train/${randseg_model_name}
+    local binarized_data_folder=/dev/null # yle will be evaluated using fairseq-interactive
+
+    local experiments_folder=$(realpath ${train_folder}/../../../)
+    local experiment_name=$(basename $(realpath ${train_folder}/../../))
+
+    prepx create \
+        --eval-only \
+        --eval-name ${new_eval_name} \
+        --raw-data-folder ${raw_data_folder} \
+        --binarized-data-folder ${binarized_data_folder} \
+        --eval-checkpoint ${train_folder}/checkpoints/checkpoint_best.pt \
+        --root-folder ${experiments_folder} \
+        --experiment-name ${experiment_name} || echo "Failed to create eval! Maybe it exists already?"
+}
+
 preprocess_yle() {
     train_folder="${randseg_root_folder}/${randseg_experiment_name}/train/${randseg_model_name}"
     data_folder="${train_folder}/raw_data"
@@ -100,4 +121,11 @@ evaluate_yle() {
 
     echo "✅ Done!"
 
+}
+
+run_yle_eval() {
+    echo "❗ Running YLE..."
+    create_yle_eval_folder
+    preprocess_yle
+    evaluate_yle "test"
 }
