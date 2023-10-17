@@ -14,25 +14,8 @@ should_confirm=${2:-"true"}
 
 cuda_visible=${CUDA_VISIBLE_DEVICES:-""}
 
-check_these_vars=(
-    "randseg_experiment_name"
-    "randseg_model_name"
-    "randseg_random_seed"
-    "randseg_pick_randomly"
-    "randseg_num_merges"
-    "randseg_root_folder"
-    "randseg_raw_data_folder"
-    "randseg_binarized_data_folder"
-    "randseg_checkpoints_folder"
-    "randseg_source_language"
-    "randseg_target_language"
-    "randseg_should_create_experiment"
-	"randseg_should_preprocess"
-	"randseg_should_train"
-	"randseg_should_evaluate"
-    "randseg_use_sentencepiece"
-    "character_level_model"
-)
+# Read in names of environment variables to check
+mapfile -t check_these_vars < ./config/mandatory_environment_variables.txt
 
 activate_conda_env () {
     source /home/$(whoami)/miniconda3/etc/profile.d/conda.sh
