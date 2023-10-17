@@ -17,3 +17,4 @@ launch_5k_exps.sh
 relaunch_2k_exps.sh
 rerun_these_deleteme.txt
 log/
+**/__pycache__/
