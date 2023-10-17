@@ -15,3 +15,4 @@ randseg_should_train
 randseg_should_evaluate
 randseg_use_sentencepiece
 character_level_model
+randseg_eval_yle
