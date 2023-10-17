@@ -399,7 +399,7 @@ train() {
         --save-interval="${randseg_save_interval}" \
         --validate-interval-updates="${randseg_validate_interval_updates}" \
         --adam-betas '(0.9, 0.98)' --update-freq="${randseg_update_freq}" \
-        --user-dir "./fairseq_extension/user"
+        --user-dir "./fairseq_extension/user" \
         --no-epoch-checkpoints \
         --max-source-positions 1400 \
         --max-target-positions 1400 \
