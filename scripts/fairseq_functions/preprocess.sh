@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-preprocess() {
+preprocess_for_translation() {
     echo "❗ Preprocessing..."
 
     train_folder="${randseg_root_folder}/${randseg_experiment_name}/train/${randseg_model_name}"
