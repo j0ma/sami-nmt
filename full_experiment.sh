@@ -7,9 +7,9 @@ echo "Execution environment:"
 env
 
 source scripts/subword_functions.sh
-for fairseq_file in scripts/fairseq_functions/*.sh
+for experiment_function_file in scripts/experiment_functions/*.sh
 do
-    source "${fairseq_file}"
+    source "${experiment_function_file}"
 done
 
 # Constants
@@ -17,6 +17,8 @@ config_file=$1
 should_confirm=${2:-"true"}
 
 cuda_visible=${CUDA_VISIBLE_DEVICES:-""}
+
+yle_raw_data_folder=$(realpath ./data/fin-sme/yle/)
 
 # Read in names of environment variables to check
 mapfile -t check_these_vars < ./config/mandatory_environment_variables.txt
@@ -70,6 +72,27 @@ create_experiment() {
         --binarized-data-folder="${randseg_binarized_data_folder}" || echo "Error creating experiment folder! Maybe it exists already?"
 
     echo "✅  Done!"
+}
+
+create_yle_eval_folder() {
+    echo "❗ Creating  eval folder"
+
+    local new_eval_name="eval_yle_${randseg_model_name}"
+    local raw_data_folder=${yle_raw_data_folder}
+    local train_folder=./experiments/${randseg_experiment_name}/train/${randseg_model_name}
+    local binarized_data_folder=/dev/null # yle will be evaluated using fairseq-interactive
+
+    local experiments_folder=$(realpath ${train_folder}/../../../)
+    local experiment_name=$(basename $(realpath ${train_folder}/../../))
+
+    prepx create \
+        --eval-only \
+        --eval-name ${new_eval_name} \
+        --raw-data-folder ${raw_data_folder} \
+        --binarized-data-folder ${binarized_data_folder} \
+        --eval-checkpoint ${train_folder}/checkpoints/checkpoint_best.pt \
+        --root-folder ${experiments_folder} \
+        --experiment-name ${experiment_name} || echo "Failed to create eval! Maybe it exists already?"
 }
 
 reverse_subword_segmentation () {
@@ -138,8 +161,13 @@ main() {
                 continue
             elif [ "$command" = "evaluate" ]; then
                 for split in "dev" "test"; do evaluate $split; done
+            elif [ "$command" = "create_experiment" ]; then
+                create_experiment
+                if [ "${randseg_eval_yle}" = "yes" ]
+                then
+                    create_yle_eval_folder
+                fi
             else
-                type $command
                 $command
             fi
         done
