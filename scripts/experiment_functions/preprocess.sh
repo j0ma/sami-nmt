@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+
 preprocess_for_translation() {
     echo "❗ Preprocessing..."
 
