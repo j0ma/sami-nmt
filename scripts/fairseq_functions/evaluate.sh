@@ -39,8 +39,6 @@ evaluate() {
     GOLD="${eval_folder}/${split}.gold"
     HYPS="${eval_folder}/${split}.hyps"
     SOURCE="${eval_folder}/${split}.source"
-    SCORE="${eval_folder}/${split}.eval.score"
-    SCORE_TSV="${eval_folder}/${split}_eval_results.tsv"
 
     # Make raw predictions
     fairseq-generate \
@@ -80,15 +78,14 @@ evaluate() {
 
     paste "${GOLD}" "${HYPS}" "${SOURCE}" >"${SOURCE_TSV}"
 
-    # Compute some evaluation metrics
-    python scripts/evaluate.py \
-        --references-path "${GOLD}" \
-        --hypotheses-path "${HYPS}" \
-        --source-path "${SOURCE}" \
-        --score-output-path "${SCORE}" \
-        --output-as-tsv
-
-    cat "${SCORE}"
+    for metric in bleu chrf
+    do
+        sacrebleu_out_file="${split}.eval.score_sacrebleu_${metric}"
+        sacrebleu ${split}.gold${detok_suffix} \
+            -i ${split}.hyps${detok_suffix} \
+            -b -m ${metric} -w 4 \
+            > "${sacrebleu_out_file}"
+    done
 
     echo "✅ Done!"
 
