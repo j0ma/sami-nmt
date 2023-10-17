@@ -90,10 +90,10 @@ main() {
     if [ "${should_confirm_commands}" = "yes" ]
     then
         commands_to_run_file=$(mktemp)
-        echo "create_experiment,preprocess_for_translation,train,evaluate,evaluate_yle" | tr "," "\t" | fzf --multi > ${commands_to_run_file}
+        echo "create_experiment,preprocess_for_translation,train,evaluate,evaluate_yle" | tr "," "\n" | fzf --multi > ${commands_to_run_file}
         mapfile -t commands_to_run < ${commands_to_run_file}
     else
-        commands_to_run=( "create_experiment" "preprocess_for_translation" "train" "evaluate" "evaluate_yle" )
+        commands_to_run=( "create_experiment" "preprocess" "train" "evaluate" "evaluate_yle" )
     fi
 
     # These should always happen
@@ -105,6 +105,8 @@ main() {
         if [ "$command" = "evaluate" ]; then
             evaluate "dev"
             evaluate "test"
+        elif [ "$command" = "preprocess" ]; then
+            preprocess_for_translation
         elif [ "$command" = "evaluate_yle" ]; then
             run_yle_eval
         else
