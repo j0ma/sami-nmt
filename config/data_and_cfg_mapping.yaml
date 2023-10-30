@@ -46,6 +46,12 @@ fin2sme:
     own_huge:
          randseg_raw_data_folder: ./data/fin-sme/own_bt_huge
          randseg_cfg_file: ./config/fin2sme/joint_own_bt_huge_fin2sme_cfg.sh
+    own_triple_nonjoint:
+         randseg_raw_data_folder: ./data/fin-sme/own_bt_triple
+         randseg_cfg_file: ./config/fin2sme/own_bt_triple_fin2sme_cfg.sh
+    own_triple_joint:
+         randseg_raw_data_folder: ./data/fin-sme/own_bt_triple
+         randseg_cfg_file: ./config/fin2sme/joint_own_bt_triple_fin2sme_cfg.sh
     own:
          randseg_raw_data_folder: ./data/fin-sme/own_bt_onceonly
          randseg_cfg_file: ./config/fin2sme/joint_own_bt_fin2sme_cfg.sh
