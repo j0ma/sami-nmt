@@ -43,6 +43,9 @@ fin2sme:
     own_best_tagged:
          randseg_raw_data_folder: ./data/fin-sme/own_bt_best_oct23_tagged/fin2sme/
          randseg_cfg_file: ./config/fin2sme/joint_own_bt_best_fin2sme_cfg.sh
+    own_best_oct23_second:
+         randseg_raw_data_folder: ./data/fin-sme/own_bt_best_oct23_second
+         randseg_cfg_file: ./config/fin2sme/nonjoint_own_bt_best_oct23second_fin2sme_cfg.sh
     own_huge:
          randseg_raw_data_folder: ./data/fin-sme/own_bt_huge
          randseg_cfg_file: ./config/fin2sme/joint_own_bt_huge_fin2sme_cfg.sh
