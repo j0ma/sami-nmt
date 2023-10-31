@@ -1,0 +1,10 @@
+randseg_decoder_attention_heads
+randseg_decoder_embedding_dim
+randseg_decoder_hidden_size
+randseg_direction
+randseg_encoder_attention_heads
+randseg_encoder_embedding_dim
+randseg_encoder_hidden_size
+randseg_num_merges
+randseg_p_dropout
+randseg_train_data_type
