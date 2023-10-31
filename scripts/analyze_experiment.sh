@@ -7,8 +7,8 @@ set -euo pipefail
 experiment_path=$1
 sweep_cfg_folder=${2:-""}
 
-tgt_lang=${target_language:-uzb}
-should_analyze_further=${analyze_further:-""}
+tgt_lang=${target_language:-sme}
+should_analyze_further=${should_analyze_further:-""}
 split=${split:-test}
 
 # constants
