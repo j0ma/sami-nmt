@@ -63,7 +63,6 @@ check_env() {
 construct_command () {
     local command_name=$1
     local flag=$2
-    #test "${flag}" = "yes" && echo "${command_name}" || echo "skip"
     if [ "${should_confirm}" = "yes" ] 
     then
         echo "${command_name}"

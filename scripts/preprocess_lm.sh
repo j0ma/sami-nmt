@@ -4,16 +4,14 @@ set -euo pipefail
 
 source scripts/subword_functions.sh
 
-corpus_name=${corpus_name}
+experiment_dir=${experiment_dir}
 language=${language}
-supp_dir=$(pwd)/supplemental_data
-data_dir=${data_dir}
-dest_dir=${dest_dir}
-dest_path=${dest_dir}/${corpus_name}
+corpus_name=${corpus_name:-$language}
+data_dir=${experiment_dir}/raw_data/
+supp_dir=${experiment_dir}/supplemental_data/
+dest_dir=${experiment_dir}/binarized_data/
 subword_model_path=${subword_model_path:-""}
 subword_vocab_size=${subword_vocab_size:-500} # nearly char level
-
-# TODO: support existing subword model
 
 mkdir -p $supp_dir $dest_dir
 
@@ -39,7 +37,7 @@ done
 fairseq-preprocess \
     --only-source \
     --workers 12  \
-    --destdir ${dest_path} \
+    --destdir ${dest_dir} \
     --trainpref ${supp_dir}/${corpus_name}.spm.train.${language} \
     --validpref ${supp_dir}/${corpus_name}.spm.dev.${language} \
     --testpref ${supp_dir}/${corpus_name}.spm.test.${language}

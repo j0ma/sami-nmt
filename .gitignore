@@ -1,6 +1,7 @@
 eng_uzb_binarized_data/
 eng_uzb_binarized_data
 data/
+data_not_from_hpcc/
 experiments/
 scratch/
 bin/
