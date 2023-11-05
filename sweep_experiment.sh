@@ -15,25 +15,7 @@
 
 test -z "${randseg_hparams_folder}" && exit 1
 
-parse_json_hparams() {
-    local hparams=$1
-    for key in $(echo $hparams | jq -r 'keys[]'); do
-        export $key=$(echo $hparams | jq -r --arg k "$key" '.[$k]')
-    done
-}
-
-sort_out_hyperparams() {
-    local hparams_line=$1
-    parse_json_hparams "${hparams_line}"
-    data_and_cfg_json=$(
-        python scripts/resolve_data_folder_and_cfg_file.py \
-            --direction "${randseg_direction}" \
-            --train-data-type "${randseg_train_data_type}"
-    )
-
-    export randseg_raw_data_folder=$(echo ${data_and_cfg_json} | jq -r '.data_folder')
-    export randseg_cfg_file=$(echo ${data_and_cfg_json} | jq -r '.cfg_file')
-}
+source ./scripts/experiment_functions/create_experiment.sh
 
 run_single_exp () {
     local gpu_idx=$1
