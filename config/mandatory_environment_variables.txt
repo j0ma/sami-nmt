@@ -9,10 +9,6 @@ randseg_binarized_data_folder
 randseg_checkpoints_folder
 randseg_source_language
 randseg_target_language
-randseg_should_create_experiment
-randseg_should_preprocess
-randseg_should_train
-randseg_should_evaluate
 randseg_use_sentencepiece
 character_level_model
 randseg_eval_yle

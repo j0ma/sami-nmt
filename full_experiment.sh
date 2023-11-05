@@ -14,7 +14,7 @@ done
 
 # Constants
 config_file=$1
-should_confirm=${2:-"yes"}
+should_confirm_commands=${2:-"yes"}
 
 cuda_visible=${CUDA_VISIBLE_DEVICES:-""}
 
@@ -22,6 +22,15 @@ yle_raw_data_folder=$(realpath ./data/fin-sme/yle/)
 
 # Read in names of environment variables to check
 mapfile -t check_these_vars < ./config/mandatory_environment_variables.txt
+
+# if should_confirm_commands=no, add the should-variables to check_these_vars
+if [ "${should_confirm_commands}" != "yes" ]
+then
+    check_these_vars+=("should_create_experiment")
+    check_these_vars+=("should_preprocess")
+    check_these_vars+=("should_train")
+    check_these_vars+=("should_evaluate")
+fi
 
 activate_conda_env () {
     source /home/$(whoami)/miniconda3/etc/profile.d/conda.sh
@@ -63,10 +72,10 @@ check_env() {
 construct_command () {
     local command_name=$1
     local flag=$2
-    if [ "${should_confirm}" = "yes" ] 
+    if [ "${should_confirm_commands}" = "yes" ]
     then
         echo "${command_name}"
-    elif [ "${flag}" = "yes" ] 
+    elif [ "${flag}" = "yes" ]
     then
         echo "${command_name}"
     else
@@ -114,4 +123,4 @@ main() {
     done
 }
 
-main "${config_file}" "${should_confirm}"
+main "${config_file}" "${should_confirm_commands}"
