@@ -41,7 +41,7 @@ preprocess_for_translation() {
 
             spm_model_vocab_prefix=${supplemental_data_folder}/joint.spm
 
-            # combine the two languages 
+            # combine the two languages
             joint_data_file=${data_folder}/train.joint
             cat ${data_folder}/train.${src} ${data_folder}/train.${tgt} > ${joint_data_file}
 
@@ -71,35 +71,38 @@ preprocess_for_translation() {
                 done
             done
         else
-            spm_model_vocab_prefix=${supplemental_data_folder}/${language}.spm
-            echo "[${language}] Learning SentencePiece ULM on train..."
-            echo "[${language}] Note: Vocab size will be taken from 'randseg_num_merges' env var"
-            train_sentencepiece_model \
-                "${data_folder}/train.${language}" \
-                "${spm_model_vocab_prefix}" \
-                "${randseg_num_merges}"
+            for language in "${src}" "${tgt}"
+            do
+                spm_model_vocab_prefix=${supplemental_data_folder}/${language}.spm
+                echo "[${language}] Learning SentencePiece ULM on train..."
+                echo "[${language}] Note: Vocab size will be taken from 'randseg_num_merges' env var"
+                train_sentencepiece_model \
+                    "${data_folder}/train.${language}" \
+                    "${spm_model_vocab_prefix}" \
+                    "${randseg_num_merges}"
 
-            spm_model_file=$spm_model_vocab_prefix.model
-            spm_vocab_file=$spm_model_vocab_prefix.vocab
+                spm_model_file=$spm_model_vocab_prefix.model
+                spm_vocab_file=$spm_model_vocab_prefix.vocab
 
-            for split in "train" "dev" "test"; do
-                echo "[${language}, ${split}] Segmenting with SentencePiece ULM..."
-                text_file="${data_folder}/${split}.${language}"
-                out_file=${supplemental_data_folder}/${split}.spm.${language}
-                apply_sentencepiece_model \
-                    "${spm_model_file}" \
-                    "${text_file}" \
-                    "${out_file}"
+                for split in "train" "dev" "test"; do
+                    echo "[${language}, ${split}] Segmenting with SentencePiece ULM..."
+                    text_file="${data_folder}/${split}.${language}"
+                    out_file=${supplemental_data_folder}/${split}.spm.${language}
+                    apply_sentencepiece_model \
+                        "${spm_model_file}" \
+                        "${text_file}" \
+                        "${out_file}"
 
-                n_lines_in_out=$(wc -l ${out_file} | cut -f1 -d' ')
-                echo "[${language}, ${split}] Number of lines in spm output file: ${n_lines_in_out}"
+                    n_lines_in_out=$(wc -l ${out_file} | cut -f1 -d' ')
+                    echo "[${language}, ${split}] Number of lines in spm output file: ${n_lines_in_out}"
+                done
             done
         fi
     else
         subword_suffix="bpe"
         if [ "$randseg_joint_subwords" = "yes" ]
         then
-            # combine the two languages 
+            # combine the two languages
             joint_data_file=${data_folder}/train.joint
             cat ${data_folder}/train.${src} ${data_folder}/train.${tgt} > ${joint_data_file}
 
