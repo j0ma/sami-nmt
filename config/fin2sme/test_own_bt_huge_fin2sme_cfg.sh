@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# remove this
-export randseg_experiment_name=test_sme2fin_own_huge_lmprior
-
 export randseg_pick_randomly=no
 export randseg_uniform=no
 export randseg_root_folder=./experiments
@@ -15,6 +12,6 @@ export randseg_model_name=${randseg_train_data_type}_${randseg_encoder_hidden_si
 
 mkdir -p $randseg_checkpoints_folder $randseg_binarized_data_folder
 
-export randseg_max_tokens="17000" 
-export randseg_max_update="15000"
+export randseg_max_tokens="1000" 
+export randseg_max_update="5"
 export randseg_lr=0.0005

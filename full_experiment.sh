@@ -16,7 +16,12 @@ done
 config_file=$1
 should_confirm_commands=${2:-"yes"}
 
+# Check if CUDA is visible and if not, inform the user about CPU mode
 cuda_visible=${CUDA_VISIBLE_DEVICES:-""}
+if [ -z "${cuda_visible}" ]
+then
+    echo "❗ [full_experiment.sh] WARNING: CUDA_VISIBLE_DEVICES is not set. Running in CPU mode."
+fi
 
 yle_raw_data_folder=$(realpath ./data/fin-sme/yle/)
 

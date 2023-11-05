@@ -4,6 +4,8 @@ set_env_var() {
     if [ -z "${!1}" ]; then
         echo "Setting variable $1=$2"
         export $1=$2
+    else
+        echo "Variable $1 already set!"
     fi
 }
 

@@ -12,6 +12,12 @@ train() {
     train_log_file="${train_folder}/train.log"
     cpu_gpu_fp16_flag=$(test -z "${cuda_visible}" && echo "--cpu" || echo "--fp16")
 
+    if [ -z "${cuda_visible}" ]
+    then
+        echo "❗ [train] WARNING: CUDA_VISIBLE_DEVICES is not set. Running in CPU mode."
+        sleep 2
+    fi
+
     if [ "${randseg_use_sentencepiece}" = "yes" ]
     then
         remove_bpe_flag="sentencepiece"

@@ -15,6 +15,11 @@ evaluate() {
     train_log_file="${train_folder}/train.log"
     cpu_gpu_fp16_flag=$(test -z "${cuda_visible}" && echo "--cpu" || echo "--fp16")
 
+    if [ -z "${cuda_visible}" ]
+    then
+        echo "❗ [evaluate] WARNING: CUDA_VISIBLE_DEVICES is not set. Running in CPU mode."
+    fi
+
     src=${randseg_source_language}
     tgt=${randseg_target_language}
 
