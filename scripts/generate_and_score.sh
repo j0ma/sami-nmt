@@ -2,13 +2,14 @@
 
 set -euo pipefail
 
-source ~/sami-nmt/scripts/subword_functions.sh
+source ./scripts/subword_functions.sh
 
 # user-specified args
 src=${src_lang:-sme}
 tgt=${tgt_lang:-fin}
 beam_size=${beam_size:-1}
 should_compute_metrics=${should_compute_metrics:-"no"}
+raw_data_folder=${raw_data_folder:-"../raw_data"}
 supplemental_data_folder=${supplemental_data_folder:-"../supplemental_data"}
 binarized_data_folder=${binarized_data_folder:-"./binarized_data"}
 checkpoint=${checkpoint:-"./checkpoint"}
@@ -16,12 +17,22 @@ max_tokens=${max_tokens:-17000}
 buffer_size=${buffer_size:-1000}
 split=${split:-"test"}
 input_file=${input_data:-${supplemental_data_folder}/${split}.spm.${src}}
+untouched_gold_file=${untouched_gold_file:-${raw_data_folder}/${split}.${tgt}}
+eval_folder=${eval_folder}
+
 
 # derived quantities
-folder=beam${beam_size}
+folder=${eval_folder}/beam${beam_size}
 mkdir -p $folder
 out=$folder/${split}.out
 hyps=$folder/${split}.spm.hyps
+
+# link spm input and untouched gold file into folder
+ln -sf $(realpath ${input_file}) $folder/${split}.spm.${src}
+ln -sf $(realpath ${untouched_gold_file}) $folder/${split}.${tgt}.detok
+
+input_file=$folder/${split}.spm.${src}
+untouched_gold_file=$folder/${split}.${tgt}.detok
 
 gpus=${CUDA_VISIBLE_DEVICES:-""}
 
@@ -59,14 +70,8 @@ then
     for metric in bleu chrf
     do
 
-        if [ -f "${split}.${tgt}" ]
-        then
-            gold_file=${split}.${tgt}
-        else
-            gold_file=${split}.gold.detok
-        fi
         score=$folder/${split}.score_${metric}
-        sacrebleu $gold_file \
+        sacrebleu $untouched_gold_file \
             -i ${hyps} \
             -b \
             -m ${metric} \

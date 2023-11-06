@@ -77,9 +77,9 @@ evaluate() {
     # evaluate with sacrebleu
     for metric in bleu chrf
     do
-        sacrebleu_out_file="${split}.eval.score_sacrebleu_${metric}"
-        sacrebleu ${split}.gold${detok_suffix} \
-            -i ${split}.hyps${detok_suffix} \
+        sacrebleu_out_file="${eval_folder}/${split}.eval.score_sacrebleu_${metric}"
+        sacrebleu ${GOLD} \
+            -i ${HYPS} \
             -b -m ${metric} -w 4 \
             > "${sacrebleu_out_file}"
     done
